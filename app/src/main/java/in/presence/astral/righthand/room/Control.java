@@ -12,7 +12,7 @@ public class Control {
     private int id;
 
     @NonNull
-    @ColumnInfo(name = "group")
+    @ColumnInfo(name = "ctrl_group")
     private String group;
 
     @NonNull

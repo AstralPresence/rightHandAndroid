@@ -21,7 +21,9 @@ public class RoomControlViewModel extends AndroidViewModel {
         mAllControls = mRepository.getAllWords();
     }
 
-    LiveData<List<Control>> getAllWords() { return mAllControls; }
+    LiveData<List<Control>> getAllControls() { return mAllControls; }
+
+
 
     public void insert(Control control) { mRepository.insert(control); }
 }

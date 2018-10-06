@@ -1,7 +1,6 @@
 package in.presence.astral.righthand.adapter;
 
 import android.content.Context;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +11,7 @@ import android.widget.TextView;
 
 import java.util.List;
 
+import androidx.recyclerview.widget.RecyclerView;
 import in.presence.astral.righthand.R;
 import in.presence.astral.righthand.room.Control;
 
@@ -33,9 +33,9 @@ public class ControlsAdapter extends RecyclerView.Adapter<ControlsAdapter.Contro
     }
 
     private final LayoutInflater mInflater;
-    private List<Control> mControls; // Cached copy of words
+    private List<Control> mControls; // Cached copy of controls
 
-    ControlsAdapter(Context context) { mInflater = LayoutInflater.from(context); }
+    public ControlsAdapter(Context context) { mInflater = LayoutInflater.from(context); }
 
     @Override
     public ControlViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -51,7 +51,7 @@ public class ControlsAdapter extends RecyclerView.Adapter<ControlsAdapter.Contro
         }
     }
 
-    void setWords(List<Control> controls){
+    void setControls(List<Control> controls){
         mControls = controls;
         notifyDataSetChanged();
     }

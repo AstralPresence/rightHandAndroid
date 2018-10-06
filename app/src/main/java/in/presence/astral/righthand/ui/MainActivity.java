@@ -21,7 +21,8 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 import in.presence.astral.righthand.R;
 import in.presence.astral.righthand.ui.roomcontrol.RoomControlFragment;
 
-public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<CursorLoader> {
+public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<CursorLoader>
+        , RoomControlFragment.OnFragmentInteractionListener {
 
     MqttAndroidClient mqttAndroidClient;
 
@@ -33,6 +34,8 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     NsdManager mNsdManager;
     NsdManager.DiscoveryListener mDiscoveryListener;
 
+    NsdManager.ResolveListener mResolveListener ;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -43,39 +46,8 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                     .commitNow();
         }
 
-        mqttAndroidClient = new MqttAndroidClient(getApplicationContext(), serverUri, clientId);
-        mqttAndroidClient.setCallback(new MqttCallbackExtended() {
-            @Override
-            public void connectComplete(boolean reconnect, String serverURI) {
+        initializeDiscoveryListener();
 
-                if (reconnect) {
-                    addToHistory("Reconnected to : " + serverURI);
-                    // Because Clean Session is true, we need to re-subscribe
-                    subscribeToTopic();
-                } else {
-                    addToHistory("Connected to: " + serverURI);
-                }
-            }
-
-            @Override
-            public void connectionLost(Throwable cause) {
-                addToHistory("The Connection was lost.");
-            }
-
-            @Override
-            public void messageArrived(String topic, MqttMessage message) throws Exception {
-                addToHistory("Incoming message: " + new String(message.getPayload()));
-            }
-
-            @Override
-            public void deliveryComplete(IMqttDeliveryToken token) {
-
-            }
-        });
-
-        MqttConnectOptions mqttConnectOptions = new MqttConnectOptions();
-        mqttConnectOptions.setAutomaticReconnect(true);
-        mqttConnectOptions.setCleanSession(false);
 
 
     }
@@ -96,9 +68,51 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
     }
 
+    public void connectMqtt(String serverUri, String clientId){
+
+        mqttAndroidClient = new MqttAndroidClient(getApplicationContext(), serverUri, clientId);
+        mqttAndroidClient.setCallback(new MqttCallbackExtended() {
+            @Override
+            public void connectComplete(boolean reconnect, String serverURI) {
+
+                if (reconnect) {
+                    // Because Clean Session is true, we need to re-subscribe
+                    subscribeToTopics();
+                }
+            }
+
+            @Override
+            public void connectionLost(Throwable cause) {
+
+            }
+
+            @Override
+            public void messageArrived(String topic, MqttMessage message) {
+                String[] groupRoomName= topic.split("/");
+
+
+
+            }
+
+            @Override
+            public void deliveryComplete(IMqttDeliveryToken token) {
+
+            }
+        });
+
+        MqttConnectOptions mqttConnectOptions = new MqttConnectOptions();
+        mqttConnectOptions.setAutomaticReconnect(true);
+        mqttConnectOptions.setCleanSession(false);
+
+    }
+
+    public void subscribeToTopics(){
+
+    }
     public void initializeDiscoveryListener() {
 
         // Instantiate a new
+
         mNsdManager = (NsdManager)this.getSystemService(Context.NSD_SERVICE);
         mDiscoveryListener = new NsdManager.DiscoveryListener() {
 
@@ -149,5 +163,10 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                 mNsdManager.stopServiceDiscovery(this);
             }
         };
+    }
+
+    @Override
+    public void onUserControlEvent(String topic, int value) {
+
     }
 }
