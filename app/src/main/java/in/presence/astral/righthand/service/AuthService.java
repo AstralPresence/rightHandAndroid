@@ -3,10 +3,6 @@ package in.presence.astral.righthand.service;
 import android.app.IntentService;
 import android.content.Intent;
 
-import com.apptronix.nitkonschedule.model.User;
-import com.apptronix.nitkonschedule.rest.ApiClient;
-import com.apptronix.nitkonschedule.student.ui.LoginActivity;
-import com.apptronix.nitkonschedule.student.ui.MainActivity;
 
 import org.greenrobot.eventbus.EventBus;
 import org.json.JSONException;
@@ -16,6 +12,10 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.concurrent.TimeUnit;
 
+import in.presence.astral.righthand.model.UserObject;
+import in.presence.astral.righthand.rest.ApiClient;
+import in.presence.astral.righthand.ui.LoginActivity;
+import in.presence.astral.righthand.ui.MainActivity;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -44,7 +44,7 @@ public class AuthService extends IntentService {
             handleActionLogin();
         } else {
             //fetch access token
-            User user = new User(this);
+            UserObject user = new UserObject(this);
             if(user.getRefreshToken()==null) { // user has logged out, route to login page
                 EventBus.getDefault().post(new MainActivity.MessageEvent("NoRefreshToken"));
             }
@@ -91,13 +91,13 @@ public class AuthService extends IntentService {
             builder.writeTimeout(30, TimeUnit.SECONDS);
             OkHttpClient client = builder.build();
 
-            User user = new User(this);
+            UserObject user = new UserObject(this);
             JSONObject postJSON = new JSONObject();
             postJSON.put("idToken",token);
             postJSON.put("fcmID",user.getFcmID());
             RequestBody body = RequestBody.create(JSON, String.valueOf(postJSON));
             Request request = new Request.Builder()
-                    .url(new URL(ApiClient.BASE_URL+"login/student"))
+                    .url(new URL(ApiClient.BASE_URL+"login"))
                     .post(body)
                     .build();
 

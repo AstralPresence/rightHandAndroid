@@ -4,8 +4,11 @@ package in.presence.astral.righthand.rest;
 
 import org.json.JSONObject;
 
+import in.presence.astral.righthand.model.AccessGroup;
+import in.presence.astral.righthand.model.ControlsResponse;
 import in.presence.astral.righthand.model.User;
 import in.presence.astral.righthand.model.UsersResponse;
+import in.presence.astral.righthand.model.Control;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
@@ -38,11 +41,17 @@ public interface ApiInterface {
     Call<UsersResponse> getAccessGroups(@Header("Authorization") String authorization);
 
     @POST("accessGroup/create")
-    Call<JSONObject> createAccessGroup(@Header("Authorization") String authorization, @Body User User);
+    Call<JSONObject> createAccessGroup(@Header("Authorization") String authorization, @Body AccessGroup accessGroup);
 
     @POST("accessGroup/edit")
-    Call<JSONObject> editAccessGroup(@Header("Authorization") String authorization, @Body User User);
+    Call<JSONObject> editAccessGroup(@Header("Authorization") String authorization, @Body AccessGroup accessGroup);
 
+    // Controls
 
+    @GET("controls/get")
+    Call<ControlsResponse> getControls(@Header("Authorization") String authorization);
+
+    @POST("controls/edit")
+    Call<JSONObject> editControls(@Header("Authorization") String authorization, @Body Control control);
 
 }

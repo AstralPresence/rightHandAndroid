@@ -1,15 +1,13 @@
 package in.presence.astral.righthand.room;
 
-import android.arch.persistence.room.ColumnInfo;
-import android.arch.persistence.room.Entity;
-import android.arch.persistence.room.PrimaryKey;
-import android.support.annotation.NonNull;
 
-@Entity(tableName = "controls", primaryKeys = {"group","room","name"})
+import androidx.annotation.NonNull;
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+
+@Entity(tableName = "controls", primaryKeys = {"ctrl_group","room","name"})
 public class Control {
 
-    @PrimaryKey(autoGenerate = true)
-    private int id;
 
     @NonNull
     @ColumnInfo(name = "ctrl_group")

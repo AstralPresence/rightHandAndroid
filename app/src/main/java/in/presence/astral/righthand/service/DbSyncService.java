@@ -2,7 +2,6 @@ package in.presence.astral.righthand.service;
 
 import android.os.AsyncTask;
 
-import com.apptronix.nitkonschedule.student.service.DBSyncTask;
 import com.firebase.jobdispatcher.JobParameters;
 import com.firebase.jobdispatcher.JobService;
 

@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Right Hand</string>
+    <string name="server_unreachable_msg">Server is unreachable</string>
+    <string name="requestlogin">Please Login</string>
 </resources>

@@ -20,10 +20,13 @@ public class AccessGroup implements Serializable {
     @SerializedName("uids")
     private List<String> uids;
 
-    public AccessGroup(String email, String accessGroupType, long userValidity){
-        this.accessGroupType=accessGroupType;
-        this.email=email;
-        this.userValidity=userValidity;
+    @SerializedName("accessAllowed")
+    private List<ControlAccessObject> accessAllowed;
+
+    public AccessGroup(String name, String type,List<String> uids){
+        this.name=name;
+        this.type=type;
+        this.uids=uids;
     }
 
 }

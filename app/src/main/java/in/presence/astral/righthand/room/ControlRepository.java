@@ -1,11 +1,11 @@
 package in.presence.astral.righthand.room;
 
 import android.app.Application;
-import android.arch.lifecycle.LiveData;
 import android.os.AsyncTask;
 
 import java.util.List;
 
+import androidx.lifecycle.LiveData;
 import in.presence.astral.righthand.dao.ControlDao;
 
 public class ControlRepository {
@@ -16,27 +16,31 @@ public class ControlRepository {
     public ControlRepository(Application application) {
         AppDatabase db = AppDatabase.getDatabase(application);
         mControlDao = db.controlObjectDao();
-        mAllControls = mControlDao.getAllControls();
     }
 
-    public LiveData<List<Control>> getAllWords() {
-        return mAllControls;
+    public List<Control> getAllControls() {
+        return mControlDao.getAllControls();
     }
 
-    public void insert (Control control) {
-        new insertAsyncTask(mControlDao).execute(control);
+
+    public List<Control> getRoomControls(String group, String room) {
+        return mControlDao.getRoomControls(group,room);
     }
 
-    private static class insertAsyncTask extends AsyncTask<Control, Void, Void> {
+    public void insertControls (List<Control> controls) {
+        new InsertAsyncTask(mControlDao).execute(controls);
+    }
+
+    private static class InsertAsyncTask extends AsyncTask<List<Control>, Void, Void> {
 
         private ControlDao mAsyncTaskDao;
 
-        insertAsyncTask(ControlDao dao) {
+        InsertAsyncTask(ControlDao dao) {
             mAsyncTaskDao = dao;
         }
 
         @Override
-        protected Void doInBackground(final Control... params) {
+        protected Void doInBackground(final List<Control>... params) {
             mAsyncTaskDao.insert(params[0]);
             return null;
         }

@@ -3,26 +3,25 @@ package in.presence.astral.righthand.ui;
 import android.content.Context;
 import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.CursorLoader;
-import android.support.v4.content.Loader;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Toast;
 
 import org.eclipse.paho.android.service.MqttAndroidClient;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
+import androidx.appcompat.app.AppCompatActivity;
 import in.presence.astral.righthand.R;
 import in.presence.astral.righthand.ui.roomcontrol.RoomControlFragment;
+import timber.log.Timber;
 
-public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<CursorLoader>
-        , RoomControlFragment.OnFragmentInteractionListener {
+public class MainActivity extends AppCompatActivity implements RoomControlFragment.OnFragmentInteractionListener {
 
     MqttAndroidClient mqttAndroidClient;
 
@@ -49,22 +48,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         initializeDiscoveryListener();
 
 
-
-    }
-
-    @NonNull
-    @Override
-    public Loader<CursorLoader> onCreateLoader(int i, @Nullable Bundle bundle) {
-        return null;
-    }
-
-    @Override
-    public void onLoadFinished(@NonNull Loader<CursorLoader> loader, CursorLoader cursorLoader) {
-
-    }
-
-    @Override
-    public void onLoaderReset(@NonNull Loader<CursorLoader> loader) {
 
     }
 
@@ -124,7 +107,8 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
             @Override
             public void onServiceFound(NsdServiceInfo service) {
-                // A service was found! Do something with it.
+                // A service was found! Do something with it.\
+                Timber.i("service %s %s",service.getServiceType(),service.getServiceName());
                 Log.d(TAG, "Service discovery success" + service);
                 if (!service.getServiceType().equals(SERVICE_TYPE)) {
                     // Service type is the string containing the protocol and
@@ -167,6 +151,61 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
     @Override
     public void onUserControlEvent(String topic, int value) {
+
+    }
+
+    @Subscribe(threadMode= ThreadMode.MAIN)
+    public void onMessageEvent(MessageEvent event){
+
+        Timber.i(event.getMessage());
+
+        switch (event.getMessage()){
+            case "ServerUnreachable": {
+
+                Toast.makeText(this, R.string.server_unreachable_msg,Toast.LENGTH_LONG).show();
+                break;
+
+            }
+            case "TokenUpdateRefused":{
+
+                signOut();
+                Toast.makeText(this, R.string.requestlogin,Toast.LENGTH_LONG).show();
+                break;
+            }
+            default:{
+                Toast.makeText(this,event.getMessage(),Toast.LENGTH_LONG).show();
+            }
+        }
+    }
+
+    public static class MessageEvent{
+         private String message;
+
+        public MessageEvent(String message){
+            this.message=message;
+        }
+
+        public String getMessage() {
+            return message;
+        }
+
+        public void setMessage(String message) {
+            this.message = message;
+        }
+    }
+    @Override
+    public void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    public void onStop() {
+        EventBus.getDefault().unregister(this);
+        super.onStop();
+    }
+
+    private void signOut(){
 
     }
 }

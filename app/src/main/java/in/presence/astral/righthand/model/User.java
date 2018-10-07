@@ -26,4 +26,27 @@ public class User implements Serializable {
         this.userValidity=userValidity;
     }
 
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getAccessGroupType() {
+        return accessGroupType;
+    }
+
+    public void setAccessGroupType(String accessGroupType) {
+        this.accessGroupType = accessGroupType;
+    }
+
+    public long getUserValidity() {
+        return userValidity;
+    }
+
+    public void setUserValidity(long userValidity) {
+        this.userValidity = userValidity;
+    }
 }

@@ -51,7 +51,7 @@ public class ControlsAdapter extends RecyclerView.Adapter<ControlsAdapter.Contro
         }
     }
 
-    void setControls(List<Control> controls){
+    public void setControls(List<Control> controls){
         mControls = controls;
         notifyDataSetChanged();
     }
