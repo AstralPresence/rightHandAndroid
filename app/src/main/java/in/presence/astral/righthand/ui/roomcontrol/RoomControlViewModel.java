@@ -13,7 +13,7 @@ public class RoomControlViewModel extends AndroidViewModel {
 
     private ControlRepository mRepository;
 
-    private List<Control> mAllControls;
+    private LiveData<List<Control>> mAllControls;
 
     public RoomControlViewModel (Application application) {
         super(application);
@@ -21,10 +21,10 @@ public class RoomControlViewModel extends AndroidViewModel {
         mAllControls = mRepository.getAllControls();
     }
 
-    List<Control> getAllControls() { return mAllControls; }
+    LiveData<List<Control>> getAllControls() { return mAllControls; }
 
 
-    List<Control> getRoomControls(String group, String room) {
+    LiveData<List<Control>> getRoomControls(String group, String room) {
         return mRepository.getRoomControls(group,room);
     }
 

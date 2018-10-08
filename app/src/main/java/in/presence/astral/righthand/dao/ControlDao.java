@@ -21,9 +21,9 @@ public interface ControlDao {
     void deleteAll();
 
     @Query("SELECT * from controls")
-    List<Control> getAllControls();
+    LiveData<List<Control>> getAllControls();
 
     @Query("SELECT * from controls where ctrl_group = :group AND room = :room")
-    List<Control> getRoomControls(String group, String room);
+    LiveData<List<Control>> getRoomControls(String group, String room);
 
 }

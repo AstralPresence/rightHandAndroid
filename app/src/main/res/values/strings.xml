@@ -2,4 +2,7 @@
     <string name="app_name">Right Hand</string>
     <string name="server_unreachable_msg">Server is unreachable</string>
     <string name="requestlogin">Please Login</string>
+    <string name="server_authentication_failed">Authentication Failed</string>
+    <string name="invalid_email">Invalid Email</string>
+    <string name="password_error">Password Length between 4 and 10</string>
 </resources>

@@ -12,20 +12,24 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.concurrent.TimeUnit;
 
+import in.presence.astral.righthand.model.Login;
 import in.presence.astral.righthand.model.UserObject;
 import in.presence.astral.righthand.rest.ApiClient;
+import in.presence.astral.righthand.rest.ApiInterface;
 import in.presence.astral.righthand.ui.LoginActivity;
 import in.presence.astral.righthand.ui.MainActivity;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
+import retrofit2.Call;
+import retrofit2.Response;
 import timber.log.Timber;
 
 
 public class AuthService extends IntentService {
 
-    public static final String ACTION_LOGIN = "com.apptronix.nitkonschedule.service.action.LOGIN";
+    public static final String ACTION_LOGIN = "in.presence.astral.righthand.service.action.LOGIN";
 
     public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
@@ -33,15 +37,20 @@ public class AuthService extends IntentService {
         super("AuthService");
     }
 
-    private String token, responseString, message;
+    private String email, password, responseString, message;
 
     @Override
     protected void onHandleIntent(Intent intent) {
 
         if(intent.getAction().equals(ACTION_LOGIN)){
             //fetch refresh token
-            token = intent.getStringExtra("idToken");
-            handleActionLogin();
+            password = intent.getStringExtra("password");
+            email = intent.getStringExtra("email");
+            try {
+                handleActionLogin();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         } else {
             //fetch access token
             UserObject user = new UserObject(this);
@@ -51,90 +60,41 @@ public class AuthService extends IntentService {
         }
     }
 
-    private void handleActionLogin() {
-/*
+    private void handleActionLogin() throws IOException {
 
-
-        Timber.i("sending token %s to server",token);
-        User user = new User(this);
-        Login loginBody = new Login(token,User.getFcmID());
+        UserObject user = new UserObject(this);
+        Login loginBody = new Login(email,password);
         ApiInterface apiService = ApiClient.getClient().create(ApiInterface.class);
         Call<String> callTT = apiService.login(loginBody);
         Response<String> response = callTT.execute();
         if(response.isSuccessful()){
+
             if(response.code()==200){
 
-                Timber.i("RefreshToken Responese %s",response.body());
+                Timber.i("RefreshToken Response %s",response.body());
+
                 if(!response.body().equals("fail")){
+
                     message="LoginFailed";
+
                 } else {
+
                     message="LoginSuccessful";
-                    User.updateTokens(response.body(),null,this);
+                    user.updateTokens(response.body(),null,this);
                 }
 
 
             } else { //bad refresh token
                 message="LoginFailed";
             }
+
+            EventBus.getDefault().post(new LoginActivity.LoginEvent(message));
+
         } else {
 
-            EventBus.getDefault().post(new MainActivity.MessageEvent("ServerUnreachable"));
-        }
-*/
-
-        try {
-            Timber.i("sending token %s to server",token);
-
-            OkHttpClient.Builder builder = new OkHttpClient.Builder();
-            builder.connectTimeout(30, TimeUnit.SECONDS);
-            builder.readTimeout(30, TimeUnit.SECONDS);
-            builder.writeTimeout(30, TimeUnit.SECONDS);
-            OkHttpClient client = builder.build();
-
-            UserObject user = new UserObject(this);
-            JSONObject postJSON = new JSONObject();
-            postJSON.put("idToken",token);
-            postJSON.put("fcmID",user.getFcmID());
-            RequestBody body = RequestBody.create(JSON, String.valueOf(postJSON));
-            Request request = new Request.Builder()
-                    .url(new URL(ApiClient.BASE_URL+"login"))
-                    .post(body)
-                    .build();
-
-            //for emulator "http://10.0.2.2:5000/login"
-            okhttp3.Response response = client.newCall(request).execute();
-
-            if(response.isSuccessful()){
-
-                responseString = response.body().string();
-                Timber.i("RefreshToken Responese %s",responseString);
-
-                if(responseString.equals("fail")){
-
-                    message="LoginFailed";
-
-                } else {
-
-                    //registration, received refresh token
-                    user.updateTokens(responseString,null,this);
-                    message="LoginSuccessful";
-
-                }
-
-            } else {
-
-                message="ServerUnreachable";
-
-            }
-
-
-        } catch (IOException | JSONException e1) {
-            e1.printStackTrace();
-
-            message="ServerUnreachable";
+            EventBus.getDefault().post(new LoginActivity.LoginEvent("ServerUnreachable"));
         }
 
-        EventBus.getDefault().post(new LoginActivity.LoginEvent(message));
     }
 
 }

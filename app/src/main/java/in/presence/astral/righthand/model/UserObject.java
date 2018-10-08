@@ -19,6 +19,7 @@ public class UserObject {
     private String fcmID;
     private String refreshToken;
     private String accessToken;
+    private String serverIP;
     private Long accessTokenTime;
 
     public UserObject(Context context){
@@ -30,6 +31,7 @@ public class UserObject {
         setRefreshToken(prefs.getString("refreshToken",null));
         setAccessToken(prefs.getString("accessToken",null));
         setFcmID(prefs.getString("fcmID",null));
+        setServerIP(prefs.getString("serverIP",null));
     }
 
     public String getFcmID() {
@@ -46,6 +48,14 @@ public class UserObject {
                 .putString("fcmID",fcmID)
                 .apply();
     }
+
+    public void setServerIP(String serverIP, Context context) {
+        PreferenceManager.getDefaultSharedPreferences(context)
+                .edit()
+                .putString("serverIP",serverIP)
+                .apply();
+    }
+
 
     public String getUserName() {
         return userName;
@@ -133,5 +143,13 @@ public class UserObject {
 
     public void setAccessTokenTime(Long accessTokenTime) {
         this.accessTokenTime = accessTokenTime;
+    }
+
+    public String getServerIP() {
+        return serverIP;
+    }
+
+    public void setServerIP(String serverIP) {
+        this.serverIP = serverIP;
     }
 }

@@ -6,6 +6,7 @@ import org.json.JSONObject;
 
 import in.presence.astral.righthand.model.AccessGroup;
 import in.presence.astral.righthand.model.ControlsResponse;
+import in.presence.astral.righthand.model.Login;
 import in.presence.astral.righthand.model.User;
 import in.presence.astral.righthand.model.UsersResponse;
 import in.presence.astral.righthand.model.Control;
@@ -53,5 +54,10 @@ public interface ApiInterface {
 
     @POST("controls/edit")
     Call<JSONObject> editControls(@Header("Authorization") String authorization, @Body Control control);
+
+    // Authentication
+
+    @POST("login/edit")
+    Call<String> login(@Body Login login);
 
 }

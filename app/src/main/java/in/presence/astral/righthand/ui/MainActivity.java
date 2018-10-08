@@ -1,6 +1,7 @@
 package in.presence.astral.righthand.ui;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
 import android.os.Bundle;
@@ -16,8 +17,11 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.net.InetAddress;
+
 import androidx.appcompat.app.AppCompatActivity;
 import in.presence.astral.righthand.R;
+import in.presence.astral.righthand.model.UserObject;
 import in.presence.astral.righthand.ui.roomcontrol.RoomControlFragment;
 import timber.log.Timber;
 
@@ -27,8 +31,8 @@ public class MainActivity extends AppCompatActivity implements RoomControlFragme
 
 
     public final String TAG = "NSD";
-    public final String SERVICE_TYPE = "NSD";
-    public final String mServiceName = "NSD";
+    public final String SERVICE_TYPE = "_righthand._tcp.";
+    public final String mServiceName = "rhserver";
 
     NsdManager mNsdManager;
     NsdManager.DiscoveryListener mDiscoveryListener;
@@ -45,14 +49,22 @@ public class MainActivity extends AppCompatActivity implements RoomControlFragme
                     .commitNow();
         }
 
+
         initializeDiscoveryListener();
+
+        UserObject user = new UserObject(this);
+        String rt = user.getRefreshToken();
+        if(rt==null||rt.isEmpty()){
+            startActivity(new Intent(this,LoginActivity.class));
+        }
 
 
 
     }
 
-    public void connectMqtt(String serverUri, String clientId){
+    public void connectMqtt(String serverUri){
 
+        String clientId = "Android" + System.currentTimeMillis();
         mqttAndroidClient = new MqttAndroidClient(getApplicationContext(), serverUri, clientId);
         mqttAndroidClient.setCallback(new MqttCallbackExtended() {
             @Override
@@ -92,11 +104,45 @@ public class MainActivity extends AppCompatActivity implements RoomControlFragme
     public void subscribeToTopics(){
 
     }
+
     public void initializeDiscoveryListener() {
 
         // Instantiate a new
 
         mNsdManager = (NsdManager)this.getSystemService(Context.NSD_SERVICE);
+        mResolveListener= new NsdManager.ResolveListener() {
+
+            @Override
+            public void onResolveFailed(NsdServiceInfo serviceInfo, int errorCode) {
+                // Called when the resolve fails. Use the error code to debug.
+                Log.e(TAG, "Resolve failed: " + errorCode);
+            }
+
+            @Override
+            public void onServiceResolved(NsdServiceInfo serviceInfo) {
+                Log.e(TAG, "Resolve Succeeded. " + serviceInfo);
+
+
+                UserObject user = new UserObject(getBaseContext());
+
+                InetAddress host = serviceInfo.getHost();
+                Timber.e("resolved %s resolved",host.toString());
+                user.setServerIP(host.toString(),getBaseContext());
+
+                if(user.getRefreshToken().isEmpty()||user.getRefreshToken()==null){
+                    startActivity(new Intent(MainActivity.this,LoginActivity.class));
+                } else {
+                    connectMqtt("tcp://" + host + ":1883");
+                }
+
+                if (serviceInfo.getServiceName().equals(mServiceName)) {
+                    Log.d(TAG, "Same IP.");
+                    return;
+                }
+
+            }
+        };
+
         mDiscoveryListener = new NsdManager.DiscoveryListener() {
 
             // Called as soon as service discovery begins.
@@ -114,11 +160,7 @@ public class MainActivity extends AppCompatActivity implements RoomControlFragme
                     // Service type is the string containing the protocol and
                     // transport layer for this service.
                     Log.d(TAG, "Unknown Service Type: " + service.getServiceType());
-                } else if (service.getServiceName().equals(mServiceName)) {
-                    // The name of the service tells the user what they'd be
-                    // connecting to. It could be "Bob's Chat App".
-                    Log.d(TAG, "Same machine: " + mServiceName);
-                } else if (service.getServiceName().contains("NsdChat")){
+                } else if (service.getServiceName().contains("rhserver")){
                     mNsdManager.resolveService(service, mResolveListener);
                 }
             }
@@ -147,6 +189,8 @@ public class MainActivity extends AppCompatActivity implements RoomControlFragme
                 mNsdManager.stopServiceDiscovery(this);
             }
         };
+        mNsdManager.discoverServices(
+                SERVICE_TYPE, NsdManager.PROTOCOL_DNS_SD, mDiscoveryListener);
     }
 
     @Override

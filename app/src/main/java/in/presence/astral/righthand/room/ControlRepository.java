@@ -18,12 +18,12 @@ public class ControlRepository {
         mControlDao = db.controlObjectDao();
     }
 
-    public List<Control> getAllControls() {
+    public LiveData<List<Control>> getAllControls() {
         return mControlDao.getAllControls();
     }
 
 
-    public List<Control> getRoomControls(String group, String room) {
+    public LiveData<List<Control>> getRoomControls(String group, String room) {
         return mControlDao.getRoomControls(group,room);
     }
 

@@ -16,8 +16,10 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class ApiClient {
 
     //public static final String BASE_URL = "http://192.168.43.89:6050/";
-    public static final String BASE_URL = "http://139.59.44.233:6050/";
+    public static String BASE_URL = "http://139.59.44.233:6050/";
     private static Retrofit retrofit = null;
+    private static Retrofit.Builder builder;
+    private static Gson gson;
 
     public static Retrofit getClient() {
         if (retrofit == null) {
@@ -28,19 +30,30 @@ public class ApiClient {
                     .writeTimeout(30, TimeUnit.SECONDS)
                     .build();
 
-            Gson gson = new GsonBuilder()
+            gson = new GsonBuilder()
                     .setLenient()
                     .create();
 
-            retrofit = new Retrofit.Builder()
+            builder = new Retrofit.Builder()
                     .baseUrl(BASE_URL)
                     .addConverterFactory(GsonConverterFactory.create(gson))
-                    .client(okClient)
-                    .build();
+                    .client(okClient);
+            retrofit=builder.build();
         }
 
         return retrofit;
     }
+
+    public static void changeApiBaseUrl(String newApiBaseUrl) {
+        BASE_URL = newApiBaseUrl;
+
+
+
+        builder = new Retrofit.Builder()
+                .addConverterFactory(GsonConverterFactory.create(gson))
+                .baseUrl(BASE_URL);
+    }
+
 
     public static <S> S createService(
             Class<S> serviceClass) {
