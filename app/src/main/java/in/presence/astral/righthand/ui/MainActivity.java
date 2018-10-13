@@ -8,6 +8,10 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.firebase.jobdispatcher.FirebaseJobDispatcher;
+import com.firebase.jobdispatcher.GooglePlayDriver;
+import com.firebase.jobdispatcher.Job;
+
 import org.eclipse.paho.android.service.MqttAndroidClient;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
@@ -22,6 +26,8 @@ import java.net.InetAddress;
 import androidx.appcompat.app.AppCompatActivity;
 import in.presence.astral.righthand.R;
 import in.presence.astral.righthand.model.UserObject;
+import in.presence.astral.righthand.rest.ApiClient;
+import in.presence.astral.righthand.service.DbSyncService;
 import in.presence.astral.righthand.ui.roomcontrol.RoomControlFragment;
 import timber.log.Timber;
 
@@ -58,9 +64,22 @@ public class MainActivity extends AppCompatActivity implements RoomControlFragme
             startActivity(new Intent(this,LoginActivity.class));
         }
 
+        syncDB();
 
 
     }
+
+    public void syncDB(){
+
+        FirebaseJobDispatcher dispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(this));
+        Job myJob = dispatcher.newJobBuilder()
+                .setService(DbSyncService.class) // the JobService that will be called
+                .setTag("my-unique-tag")        // uniquely identifies the job
+                .build();
+
+        dispatcher.mustSchedule(myJob);
+    }
+
 
     public void connectMqtt(String serverUri){
 
@@ -129,7 +148,7 @@ public class MainActivity extends AppCompatActivity implements RoomControlFragme
                 Timber.e("resolved %s resolved",host.toString());
                 user.setServerIP(host.toString(),getBaseContext());
 
-                if(user.getRefreshToken().isEmpty()||user.getRefreshToken()==null){
+                if(user.getRefreshToken()==null||user.getRefreshToken().isEmpty()){
                     startActivity(new Intent(MainActivity.this,LoginActivity.class));
                 } else {
                     connectMqtt("tcp://" + host + ":1883");

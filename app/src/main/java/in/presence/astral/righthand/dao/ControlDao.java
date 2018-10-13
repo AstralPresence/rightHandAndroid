@@ -15,7 +15,7 @@ import in.presence.astral.righthand.room.Control;
 public interface ControlDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void insert(List<Control> controlObject);
+    void insert(Control controlObject);
 
     @Query("DELETE FROM controls")
     void deleteAll();

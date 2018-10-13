@@ -10,10 +10,26 @@ import java.util.List;
  */
 
 public class ControlsResponse implements Serializable {
-    @SerializedName("results")
-    private List<Control> results;
 
-    public List<Control> getResults() {
-        return results;
+    @SerializedName("result")
+    private String result;
+
+    @SerializedName("message")
+    private List<Control> message;
+
+    public List<Control> getMessage() {
+        return message;
+    }
+
+    public void setMessage(List<Control> message) {
+        this.message = message;
+    }
+
+    public String getResult() {
+        return result;
+    }
+
+    public void setResult(String result) {
+        this.result = result;
     }
 }

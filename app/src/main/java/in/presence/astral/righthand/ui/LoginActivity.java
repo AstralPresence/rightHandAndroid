@@ -23,7 +23,9 @@ import java.net.InetAddress;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
 import in.presence.astral.righthand.R;
+import in.presence.astral.righthand.model.Login;
 import in.presence.astral.righthand.model.UserObject;
+import in.presence.astral.righthand.service.AuthService;
 import timber.log.Timber;
 
 public class LoginActivity extends AppCompatActivity {
@@ -49,6 +51,7 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
 
         getSupportActionBar().hide();
+
         textDummyHintUsername = findViewById(R.id.text_dummy_hint_username);
         textDummyHintPassword = findViewById(R.id.text_dummy_hint_password);
         editUsername = findViewById(R.id.edit_username);
@@ -111,11 +114,16 @@ public class LoginActivity extends AppCompatActivity {
                     return;
                 }
 
-                lgnBtn.setEnabled(false);
 
 
                 String email = editUsername.getText().toString();
                 String password = editPassword.getText().toString();
+
+                Intent intent = new Intent(LoginActivity.this,AuthService.class);
+                intent.setAction(AuthService.ACTION_LOGIN);
+                intent.putExtra("email",email);
+                intent.putExtra("password",password);
+                startService(intent);
 
             }
         });
@@ -133,18 +141,18 @@ public class LoginActivity extends AppCompatActivity {
         switch (event.getMessage()){
             case "LoginSuccessful":{
 
-                startActivity(new Intent(this,MainActivity.class));
+                startActivity(new Intent(LoginActivity.this,MainActivity.class));
                 finish();
                 break;
 
             } case "LoginFailed":{
 
-                Toast.makeText(this, R.string.server_authentication_failed, Toast.LENGTH_LONG).show();
+                Toast.makeText(LoginActivity.this, R.string.server_authentication_failed, Toast.LENGTH_LONG).show();
                 break;
 
             }case "ServerUnreachable": {
 
-                Toast.makeText(this, R.string.server_unreachable_msg,Toast.LENGTH_LONG).show();
+                Toast.makeText(LoginActivity.this, R.string.server_unreachable_msg,Toast.LENGTH_LONG).show();
                 break;
 
             }

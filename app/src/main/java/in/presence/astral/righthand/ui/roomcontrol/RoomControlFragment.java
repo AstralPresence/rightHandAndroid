@@ -70,13 +70,13 @@ public class RoomControlFragment extends Fragment {
 
     public void onRoomSelected(String room, String group){
         mViewModel = ViewModelProviders.of(this).get(RoomControlViewModel.class);
-        mViewModel.getRoomControls(group,room);/*.observe(this, new Observer<List<Control>>() {
+        mViewModel.getRoomControls(group,room).observe(this, new Observer<List<Control>>() {
             @Override
             public void onChanged(@Nullable final List<Control> ctrls) {
                 // Update the cached copy of the words in the adapter.
                 adapter.setControls(ctrls);
             }
-        });*/
+        });
 
     }
 

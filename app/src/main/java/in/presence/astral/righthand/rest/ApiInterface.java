@@ -57,7 +57,7 @@ public interface ApiInterface {
 
     // Authentication
 
-    @POST("login/edit")
+    @POST("loginEmail")
     Call<String> login(@Body Login login);
 
 }

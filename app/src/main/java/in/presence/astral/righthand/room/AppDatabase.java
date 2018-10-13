@@ -7,7 +7,7 @@ import androidx.room.Room;
 import androidx.room.RoomDatabase;
 import in.presence.astral.righthand.dao.ControlDao;
 
-@Database(entities = {Control.class}, version = 1)
+@Database(entities = {Control.class}, version = 2)
 public abstract class AppDatabase extends RoomDatabase {
 
     public abstract ControlDao controlObjectDao();
@@ -15,7 +15,7 @@ public abstract class AppDatabase extends RoomDatabase {
 
     private static volatile AppDatabase INSTANCE;
 
-    static AppDatabase getDatabase(final Context context) {
+    public static AppDatabase getDatabase(final Context context) {
         if (INSTANCE == null) {
             synchronized (AppDatabase.class) {
                 if (INSTANCE == null) {

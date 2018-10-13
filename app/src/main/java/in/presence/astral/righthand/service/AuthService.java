@@ -67,13 +67,15 @@ public class AuthService extends IntentService {
         ApiInterface apiService = ApiClient.getClient().create(ApiInterface.class);
         Call<String> callTT = apiService.login(loginBody);
         Response<String> response = callTT.execute();
+
         if(response.isSuccessful()){
 
             if(response.code()==200){
 
                 Timber.i("RefreshToken Response %s",response.body());
 
-                if(!response.body().equals("fail")){
+
+                if(response.body().equals("fail")){
 
                     message="LoginFailed";
 

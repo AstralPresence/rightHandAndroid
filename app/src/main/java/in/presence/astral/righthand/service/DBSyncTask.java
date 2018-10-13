@@ -23,6 +23,8 @@ import in.presence.astral.righthand.model.ControlsResponse;
 import in.presence.astral.righthand.model.UserObject;
 import in.presence.astral.righthand.rest.ApiClient;
 import in.presence.astral.righthand.rest.ApiInterface;
+import in.presence.astral.righthand.room.AppDatabase;
+import in.presence.astral.righthand.room.ControlRepository;
 import in.presence.astral.righthand.ui.MainActivity;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -118,7 +120,7 @@ public class DBSyncTask {
             Response<ControlsResponse> response = callTT.execute();
             if(response.isSuccessful()){
                 if(response.code()==200){
-                    List<Control> ctrlList = response.body().getResults();
+                    List<Control> ctrlList = response.body().getMessage();
                     insertControlsList(ctrlList);
                 } else if (response.code() == 401) { //bad auth
                     user.setAccessToken(null, mContext); //reset access token
@@ -133,15 +135,16 @@ public class DBSyncTask {
 
     private static void insertControlsList(List<Control> ctrlList) {
 
-        Vector<ContentValues> cVVector = new Vector<ContentValues>(ctrlList.size()*8);
 
         for(Control ctrl: ctrlList){
 
-            ContentValues timeTableCV = new ContentValues();
-            cVVector.add(timeTableCV);
+            AppDatabase.getDatabase(mContext).controlObjectDao().insert(new in.presence.astral.righthand.room.Control(
+                    ctrl.getGroup(),ctrl.getRoom(),ctrl.getName(),ctrl.getType(),ctrl.getDisplayName(),ctrl.getStatus()
+            ));
 
 
         }
+
     }
 
 }

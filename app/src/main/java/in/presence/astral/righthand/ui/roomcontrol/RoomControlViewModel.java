@@ -29,5 +29,5 @@ public class RoomControlViewModel extends AndroidViewModel {
     }
 
 
-    public void insert(List<Control> control) { mRepository.insertControls(control); }
+    public void insert(Control control) { mRepository.insertControls(control); }
 }

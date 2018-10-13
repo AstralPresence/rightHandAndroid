@@ -22,12 +22,21 @@ public class Control {
     private String name;
 
     @ColumnInfo(name = "status")
-    private Float status;
+    private float status;
 
-    public Control(String group, String room, String name) {
+    @ColumnInfo(name = "type")
+    private String type;
+
+    @ColumnInfo(name = "displayName")
+    private String displayName;
+
+    public Control(String group, String room, String name, String type, String displayName,float status) {
         this.group = group;
         this.room = room;
         this.name = name;
+        this.type = type;
+        this.displayName= displayName;
+        this.status=status;
     }
 
     @NonNull
@@ -57,12 +66,27 @@ public class Control {
         this.name = name;
     }
 
-    public Float getStatus() {
+    public float getStatus() {
         return status;
     }
 
-    public void setStatus(Float status) {
+    public void setStatus(float status) {
         this.status = status;
     }
 
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
 }

@@ -27,6 +27,7 @@
         </activity>
 
         <service android:name=".service.AuthService" />
+        <service android:name=".service.DbSyncService" />
 
     </application>
 

@@ -6,8 +6,15 @@ import java.io.Serializable;
 
 public class Control implements Serializable {
 
+
+    @SerializedName("type")
+    private String type;
+
     @SerializedName("name")
     private String name;
+
+    @SerializedName("status")
+    private float status;
 
     @SerializedName("displayName")
     private String displayName;
@@ -18,15 +25,13 @@ public class Control implements Serializable {
     @SerializedName("room")
     private String room;
 
-    @SerializedName("status")
-    private long status;
-
-    public Control(String name, String displayName, String group, String room, long status){
+    public Control(String name, String displayName, String group, String room, float status, String type ){
         this.name=name;
         this.room=room;
         this.displayName=displayName;
         this.group=group;
         this.status=status;
+        this.type=type;
     }
 
     public String getName() {
@@ -45,11 +50,35 @@ public class Control implements Serializable {
         this.displayName = displayName;
     }
 
-    public long getStatus() {
+    public float getStatus() {
         return status;
     }
 
-    public void setStatus(long status) {
+    public void setStatus(float status) {
         this.status = status;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getRoom() {
+        return room;
+    }
+
+    public void setRoom(String room) {
+        this.room = room;
+    }
+
+    public String getGroup() {
+        return group;
+    }
+
+    public void setGroup(String group) {
+        this.group = group;
     }
 }

@@ -27,11 +27,11 @@ public class ControlRepository {
         return mControlDao.getRoomControls(group,room);
     }
 
-    public void insertControls (List<Control> controls) {
+    public void insertControls (Control controls) {
         new InsertAsyncTask(mControlDao).execute(controls);
     }
 
-    private static class InsertAsyncTask extends AsyncTask<List<Control>, Void, Void> {
+    private static class InsertAsyncTask extends AsyncTask<Control, Void, Void> {
 
         private ControlDao mAsyncTaskDao;
 
@@ -40,7 +40,7 @@ public class ControlRepository {
         }
 
         @Override
-        protected Void doInBackground(final List<Control>... params) {
+        protected Void doInBackground(final Control... params) {
             mAsyncTaskDao.insert(params[0]);
             return null;
         }
