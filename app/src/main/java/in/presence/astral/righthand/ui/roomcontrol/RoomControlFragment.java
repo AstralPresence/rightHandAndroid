@@ -24,6 +24,8 @@ public class RoomControlFragment extends Fragment {
     private RoomControlViewModel mViewModel;
     ControlsAdapter adapter;
     View rootView;
+    RecyclerView controlsRecyclerView;
+    static String group, room;
 
 
     private OnFragmentInteractionListener mListener;
@@ -37,20 +39,14 @@ public class RoomControlFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         rootView =  inflater.inflate(R.layout.room_control_fragment, container, false);
-        return rootView;
-    }
-
-    @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        RecyclerView recyclerView = rootView.findViewById(R.id.recyclerview);
+        controlsRecyclerView = rootView.findViewById(R.id.roomcontrolsrecyclerview);
         adapter = new ControlsAdapter(getContext());
-        recyclerView.setAdapter(adapter);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-
-
+        controlsRecyclerView.setAdapter(adapter);
+        controlsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        return rootView;
 
     }
+
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -69,14 +65,7 @@ public class RoomControlFragment extends Fragment {
     }
 
     public void onRoomSelected(String room, String group){
-        mViewModel = ViewModelProviders.of(this).get(RoomControlViewModel.class);
-        mViewModel.getRoomControls(group,room).observe(this, new Observer<List<Control>>() {
-            @Override
-            public void onChanged(@Nullable final List<Control> ctrls) {
-                // Update the cached copy of the words in the adapter.
-                adapter.setControls(ctrls);
-            }
-        });
+
 
     }
 

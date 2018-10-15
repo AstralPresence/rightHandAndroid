@@ -8,12 +8,10 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.eclipse.paho.android.service.MqttAndroidClient;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
@@ -23,9 +21,9 @@ import java.net.InetAddress;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
 import in.presence.astral.righthand.R;
-import in.presence.astral.righthand.model.Login;
 import in.presence.astral.righthand.model.UserObject;
 import in.presence.astral.righthand.service.AuthService;
+import in.presence.astral.righthand.ui.main.MainActivity;
 import timber.log.Timber;
 
 public class LoginActivity extends AppCompatActivity {

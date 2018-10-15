@@ -1,8 +1,6 @@
-package in.presence.astral.righthand.ui.roomcontrol;
+package in.presence.astral.righthand.ui.main;
 
 import android.app.Application;
-
-import org.w3c.dom.ls.LSException;
 
 import java.util.List;
 
@@ -12,28 +10,29 @@ import androidx.lifecycle.MutableLiveData;
 import in.presence.astral.righthand.room.Control;
 import in.presence.astral.righthand.room.ControlRepository;
 
-public class RoomControlViewModel extends AndroidViewModel {
+public class MainViewModel extends AndroidViewModel {
 
     private ControlRepository mRepository;
 
+    private LiveData<List<Control>> mAllControls;
 
-    public RoomControlViewModel (Application application) {
+    public MainViewModel (Application application) {
         super(application);
         mRepository = new ControlRepository(application);
+        mAllControls = mRepository.getAllControls();
     }
 
+    LiveData<List<Control>> getAllControls() { return mAllControls; }
 
     LiveData<List<String>> getDistinctGroups() {return  mRepository.getDistinctGroups(); }
 
     LiveData<List<String>> getDistinctRooms(String group) {return  mRepository.getAllRoomsOfGroup(group); }
 
-    LiveData<List<Control>> getRoomControls(String group, String room) {
-        return mRepository.getRoomControls(group,room);
+    public final LiveData<String> mTitle = new MutableLiveData<String>();
+
+    public void setSelectedGroupRoom(String groupRoom){
+        mRepository.setSelectedGroupRoom(groupRoom);
     }
 
-    MutableLiveData<String> getSelectedGroupRoom(){
-        return mRepository.getSelectedGroupRoom();
-    }
 
-    public void insert(Control control) { mRepository.insertControls(control); }
 }

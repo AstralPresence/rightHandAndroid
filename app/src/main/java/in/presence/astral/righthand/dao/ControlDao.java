@@ -23,6 +23,15 @@ public interface ControlDao {
     @Query("SELECT * from controls")
     LiveData<List<Control>> getAllControls();
 
+
+    @Query("SELECT DISTINCT ctrl_group from controls")
+    LiveData<List<String>> getAllGroups();
+
+    @Query("SELECT DISTINCT room from controls where ctrl_group = :group")
+    LiveData<List<String>> getAllRoomsOfGroup(String group);
+
+
+
     @Query("SELECT * from controls where ctrl_group = :group AND room = :room")
     LiveData<List<Control>> getRoomControls(String group, String room);
 

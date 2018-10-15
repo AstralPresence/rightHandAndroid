@@ -1,4 +1,4 @@
-package in.presence.astral.righthand.ui;
+package in.presence.astral.righthand.ui.main;
 
 import android.content.Context;
 import android.content.Intent;
@@ -6,11 +6,20 @@ import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
 import com.firebase.jobdispatcher.FirebaseJobDispatcher;
 import com.firebase.jobdispatcher.GooglePlayDriver;
 import com.firebase.jobdispatcher.Job;
+import com.mikepenz.materialdrawer.Drawer;
+import com.mikepenz.materialdrawer.DrawerBuilder;
+import com.mikepenz.materialdrawer.model.DividerDrawerItem;
+import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
+import com.mikepenz.materialdrawer.model.SecondaryDrawerItem;
+import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 
 import org.eclipse.paho.android.service.MqttAndroidClient;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
@@ -22,14 +31,22 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.net.InetAddress;
+import java.util.List;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProviders;
 import in.presence.astral.righthand.R;
 import in.presence.astral.righthand.model.UserObject;
-import in.presence.astral.righthand.rest.ApiClient;
+import in.presence.astral.righthand.room.Control;
 import in.presence.astral.righthand.service.DbSyncService;
+import in.presence.astral.righthand.ui.LoginActivity;
 import in.presence.astral.righthand.ui.roomcontrol.RoomControlFragment;
+import in.presence.astral.righthand.ui.roomcontrol.RoomControlViewModel;
 import timber.log.Timber;
+
 
 public class MainActivity extends AppCompatActivity implements RoomControlFragment.OnFragmentInteractionListener {
 
@@ -42,20 +59,29 @@ public class MainActivity extends AppCompatActivity implements RoomControlFragme
 
     NsdManager mNsdManager;
     NsdManager.DiscoveryListener mDiscoveryListener;
+    RoomControlFragment mRoomControlFragment;
+    MainViewModel mainViewModel;
+    Toolbar toolbar;
+    int grpCount=0,roomCount;
 
-    NsdManager.ResolveListener mResolveListener ;
+    NsdManager.ResolveListener mResolveListener;
+    Drawer drawer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity);
+        mRoomControlFragment = RoomControlFragment.newInstance();
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.container, RoomControlFragment.newInstance())
+                    .replace(R.id.container, mRoomControlFragment)
                     .commitNow();
         }
 
 
+        toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
         initializeDiscoveryListener();
 
         UserObject user = new UserObject(this);
@@ -67,6 +93,64 @@ public class MainActivity extends AppCompatActivity implements RoomControlFragme
         syncDB();
 
 
+        PrimaryDrawerItem item1 = new PrimaryDrawerItem().withIdentifier(1).withName(R.string.app_name);
+
+
+
+        //create the drawer and remember the `Drawer` result object
+        drawer = new DrawerBuilder()
+                .withActivity(this)
+                .withToolbar(toolbar)
+                .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
+                    @Override
+                    public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
+                        // do something with the clicked item :D
+
+                        if(drawerItem instanceof PrimaryDrawerItem) {
+
+                            return false;
+                        } else {
+
+                            PrimaryDrawerItem primaryDrawerItem = (PrimaryDrawerItem) drawerItem.getParent();
+
+                            String groupRoom = primaryDrawerItem.getName().getText(MainActivity.this) + "/" +
+                                    ((SecondaryDrawerItem)drawerItem).getName().getText(MainActivity.this);
+                            mainViewModel.setSelectedGroupRoom(groupRoom);
+                        }
+                        return true;
+                    }
+                })
+                .build();
+
+
+        mainViewModel = ViewModelProviders.of(this).get(MainViewModel.class);
+        mainViewModel.getDistinctGroups().observe(this, new Observer<List<String>>() {
+            @Override
+            public void onChanged(@Nullable final List<String> groups) {
+                // Update the cached copy of the words in the adapter.
+
+                grpCount=0;
+                drawer.removeAllItems();
+
+                for(String group: groups){
+
+                    grpCount++;
+                    PrimaryDrawerItem item1 = new PrimaryDrawerItem().withIdentifier(grpCount).withName(group);
+
+                    mainViewModel.getDistinctRooms(group).observe(MainActivity.this, new Observer<List<String>>() {
+                        @Override
+                        public void onChanged(List<String> rooms) {
+
+                            for(String room : rooms){
+                                SecondaryDrawerItem item = new SecondaryDrawerItem().withName(room);
+                                item1.withSubItems(item);
+                            }
+                        }
+                    });
+                    drawer.addItem(item1);
+                }
+            }
+        });
     }
 
     public void syncDB(){
@@ -217,6 +301,28 @@ public class MainActivity extends AppCompatActivity implements RoomControlFragme
 
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_settings) {
+            return true;
+        } else if (id == R.id.action_signout) {
+            signOut();
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
     @Subscribe(threadMode= ThreadMode.MAIN)
     public void onMessageEvent(MessageEvent event){
 
@@ -270,5 +376,8 @@ public class MainActivity extends AppCompatActivity implements RoomControlFragme
 
     private void signOut(){
 
+        UserObject userObject = new UserObject(this);
+        userObject.updateTokens(null,null,this);
+        startActivity(new Intent(MainActivity.this,LoginActivity.class));
     }
 }

@@ -5,23 +5,16 @@ import android.content.Intent;
 
 
 import org.greenrobot.eventbus.EventBus;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.IOException;
-import java.net.URL;
-import java.util.concurrent.TimeUnit;
 
 import in.presence.astral.righthand.model.Login;
 import in.presence.astral.righthand.model.UserObject;
 import in.presence.astral.righthand.rest.ApiClient;
 import in.presence.astral.righthand.rest.ApiInterface;
 import in.presence.astral.righthand.ui.LoginActivity;
-import in.presence.astral.righthand.ui.MainActivity;
+import in.presence.astral.righthand.ui.main.MainActivity;
 import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Response;
 import timber.log.Timber;

@@ -1,11 +1,6 @@
 package in.presence.astral.righthand.service;
 
-import android.appwidget.AppWidgetManager;
-import android.content.ComponentName;
-import android.content.ContentValues;
 import android.content.Context;
-import android.content.Intent;
-import android.database.Cursor;
 
 import org.greenrobot.eventbus.EventBus;
 import org.json.JSONException;
@@ -14,8 +9,6 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
-import java.util.Objects;
-import java.util.Vector;
 import java.util.concurrent.TimeUnit;
 
 import in.presence.astral.righthand.model.Control;
@@ -24,8 +17,7 @@ import in.presence.astral.righthand.model.UserObject;
 import in.presence.astral.righthand.rest.ApiClient;
 import in.presence.astral.righthand.rest.ApiInterface;
 import in.presence.astral.righthand.room.AppDatabase;
-import in.presence.astral.righthand.room.ControlRepository;
-import in.presence.astral.righthand.ui.MainActivity;
+import in.presence.astral.righthand.ui.main.MainActivity;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
