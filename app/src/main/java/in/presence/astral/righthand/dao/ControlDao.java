@@ -9,6 +9,7 @@ import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
+import androidx.room.Update;
 import in.presence.astral.righthand.room.Control;
 
 @Dao
@@ -30,6 +31,9 @@ public interface ControlDao {
     @Query("SELECT DISTINCT room from controls where ctrl_group = :group")
     LiveData<List<String>> getAllRoomsOfGroup(String group);
 
+
+    @Query("UPDATE controls SET status = :status WHERE ctrl_group =:group AND room = :room AND name = :name")
+    void update(float status, String group, String room, String name);
 
 
     @Query("SELECT * from controls where ctrl_group = :group AND room = :room")

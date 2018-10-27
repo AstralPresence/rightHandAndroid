@@ -22,14 +22,23 @@ import com.mikepenz.materialdrawer.model.SecondaryDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 
 import org.eclipse.paho.android.service.MqttAndroidClient;
+import org.eclipse.paho.client.mqttv3.IMqttActionListener;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
+import org.eclipse.paho.client.mqttv3.IMqttMessageListener;
+import org.eclipse.paho.client.mqttv3.IMqttToken;
 import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
+import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
+import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.eclipse.paho.client.mqttv3.MqttPersistenceException;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
+import org.json.JSONException;
+import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.util.List;
 
@@ -60,13 +69,16 @@ public class MainActivity extends AppCompatActivity implements RoomControlFragme
     NsdManager mNsdManager;
     NsdManager.DiscoveryListener mDiscoveryListener;
     RoomControlFragment mRoomControlFragment;
+    SecondaryDrawerItem item;
     MainViewModel mainViewModel;
     Toolbar toolbar;
     int grpCount=0,roomCount;
+    IMqttMessageListener iMqttMessageListener;
 
     NsdManager.ResolveListener mResolveListener;
     Drawer drawer;
 
+    String selectedGroup,selectedRoom;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -93,10 +105,14 @@ public class MainActivity extends AppCompatActivity implements RoomControlFragme
         syncDB();
 
 
-        PrimaryDrawerItem item1 = new PrimaryDrawerItem().withIdentifier(1).withName(R.string.app_name);
+        PrimaryDrawerItem item1 = new PrimaryDrawerItem().withIdentifier(1).withName("--Rooms--");
 
 
-
+        try {
+            connectMqtt("tcp://192.168.1.105:1883");
+        } catch (MqttException e) {
+            e.printStackTrace();
+        }
         //create the drawer and remember the `Drawer` result object
         drawer = new DrawerBuilder()
                 .withActivity(this)
@@ -113,9 +129,14 @@ public class MainActivity extends AppCompatActivity implements RoomControlFragme
 
                             PrimaryDrawerItem primaryDrawerItem = (PrimaryDrawerItem) drawerItem.getParent();
 
-                            String groupRoom = primaryDrawerItem.getName().getText(MainActivity.this) + "/" +
-                                    ((SecondaryDrawerItem)drawerItem).getName().getText(MainActivity.this);
-                            mainViewModel.setSelectedGroupRoom(groupRoom);
+                            selectedGroup = primaryDrawerItem.getName().getText(MainActivity.this);
+                            selectedRoom = ((SecondaryDrawerItem)drawerItem).getName().getText(MainActivity.this);
+
+                            String groupRoom = selectedGroup + "/" +selectedRoom;
+                            Timber.i("ccliclkd %s",groupRoom);
+                            EventBus.getDefault().post(new RoomControlFragment.MessageEvent(groupRoom));
+
+                            drawer.closeDrawer();
                         }
                         return true;
                     }
@@ -135,14 +156,22 @@ public class MainActivity extends AppCompatActivity implements RoomControlFragme
                 for(String group: groups){
 
                     grpCount++;
-                    PrimaryDrawerItem item1 = new PrimaryDrawerItem().withIdentifier(grpCount).withName(group);
+                    PrimaryDrawerItem item1 = new PrimaryDrawerItem().withIdentifier(grpCount).withSelectable(false).withName(group);
 
                     mainViewModel.getDistinctRooms(group).observe(MainActivity.this, new Observer<List<String>>() {
                         @Override
                         public void onChanged(List<String> rooms) {
 
                             for(String room : rooms){
-                                SecondaryDrawerItem item = new SecondaryDrawerItem().withName(room);
+                                if(room.toLowerCase().contains("kitchen")){
+                                    item = new SecondaryDrawerItem().withName(room).withIcon(R.drawable.ic_kitchen_24dp);
+                                } else if(room.toLowerCase().contains("living")){
+                                    item = new SecondaryDrawerItem().withName(room).withIcon(R.drawable.ic_living_room_24dp);
+                                } else if(room.toLowerCase().contains("bedroom")){
+                                    item = new SecondaryDrawerItem().withName(room).withIcon(R.drawable.ic_bedroom_black_24dp);
+                                } else {
+                                    item = new SecondaryDrawerItem().withName(room).withIcon(R.drawable.ic_plant_black_24dp);
+                                }
                                 item1.withSubItems(item);
                             }
                         }
@@ -165,46 +194,67 @@ public class MainActivity extends AppCompatActivity implements RoomControlFragme
     }
 
 
-    public void connectMqtt(String serverUri){
+    public void connectMqtt(String serverUri) throws MqttException {
 
-        String clientId = "Android" + System.currentTimeMillis();
+        Timber.i("mqtt attempt started");
+        String clientId = MqttClient.generateClientId();
         mqttAndroidClient = new MqttAndroidClient(getApplicationContext(), serverUri, clientId);
-        mqttAndroidClient.setCallback(new MqttCallbackExtended() {
+        mqttAndroidClient.connect().setActionCallback(new IMqttActionListener() {
             @Override
-            public void connectComplete(boolean reconnect, String serverURI) {
-
-                if (reconnect) {
-                    // Because Clean Session is true, we need to re-subscribe
-                    subscribeToTopics();
-                }
-            }
-
-            @Override
-            public void connectionLost(Throwable cause) {
+            public void onSuccess(IMqttToken asyncActionToken) {
+                Timber.i("mqtt connected");
+                // Because Clean Session is true, we need to re-subscribe
+                subscribeToTopics();
 
             }
 
             @Override
-            public void messageArrived(String topic, MqttMessage message) {
-                String[] groupRoomName= topic.split("/");
-
-
-
-            }
-
-            @Override
-            public void deliveryComplete(IMqttDeliveryToken token) {
+            public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
 
             }
         });
 
-        MqttConnectOptions mqttConnectOptions = new MqttConnectOptions();
-        mqttConnectOptions.setAutomaticReconnect(true);
-        mqttConnectOptions.setCleanSession(false);
+
 
     }
 
     public void subscribeToTopics(){
+
+        mainViewModel = ViewModelProviders.of(this).get(MainViewModel.class);
+        mainViewModel.getAllControls().observe(MainActivity.this, new Observer<List<Control>>() {
+            @Override
+            public void onChanged(List<Control> controls) {
+
+                for (Control c: controls){
+                    String group = c.getGroup();
+                    String room = c.getRoom();
+                    String name = c.getName();
+                    Timber.i("mqtt subscribe %s",c.getName());
+                    try {
+                        iMqttMessageListener = new IMqttMessageListener() {
+                            @Override
+                            public void messageArrived(String topic, MqttMessage message) {
+                                String[] grn= topic.split("/");
+
+                                try {
+
+                                    JSONObject jsonObject = new JSONObject(new String(message.getPayload()));
+                                    mainViewModel.updateStatus(grn[0],grn[1],grn[2], (Float) jsonObject.get("state"));
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                                MqttConnectOptions mqttConnectOptions = new MqttConnectOptions();
+                                mqttConnectOptions.setAutomaticReconnect(true);
+                                mqttConnectOptions.setCleanSession(false);
+                            }
+                        };
+                        mqttAndroidClient.subscribe(group+"/"+room+"/"+name,2,iMqttMessageListener);
+                    } catch (MqttException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
 
     }
 
@@ -235,7 +285,11 @@ public class MainActivity extends AppCompatActivity implements RoomControlFragme
                 if(user.getRefreshToken()==null||user.getRefreshToken().isEmpty()){
                     startActivity(new Intent(MainActivity.this,LoginActivity.class));
                 } else {
-                    connectMqtt("tcp://" + host + ":1883");
+                    try {
+                        connectMqtt("tcp://" + host + ":1883");
+                    } catch (MqttException e) {
+                        e.printStackTrace();
+                    }
                 }
 
                 if (serviceInfo.getServiceName().equals(mServiceName)) {
@@ -262,7 +316,7 @@ public class MainActivity extends AppCompatActivity implements RoomControlFragme
                 if (!service.getServiceType().equals(SERVICE_TYPE)) {
                     // Service type is the string containing the protocol and
                     // transport layer for this service.
-                    Log.d(TAG, "Unknown Service Type: " + service.getServiceType());
+                    Log.d(TAG, "Unknown Service Type : " + service.getServiceType());
                 } else if (service.getServiceName().contains("rhserver")){
                     mNsdManager.resolveService(service, mResolveListener);
                 }
@@ -341,6 +395,27 @@ public class MainActivity extends AppCompatActivity implements RoomControlFragme
                 Toast.makeText(this, R.string.requestlogin,Toast.LENGTH_LONG).show();
                 break;
             }
+            case "mqtt":{
+
+                String topic = selectedGroup+"/"+selectedRoom+"/"+event.getControlName();
+                Timber.i("%s %s",topic,String.valueOf(event.getStatus()));
+                JSONObject jsonObject = new JSONObject();
+                try {
+                    jsonObject.put("state",event.getStatus());
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                try {
+                    Timber.i("%s",String.valueOf(jsonObject.toString().getBytes("UTF-8")));
+                    MqttMessage message = new MqttMessage(jsonObject.toString().getBytes("UTF-8"));
+                    message.setQos(2);
+                    mqttAndroidClient.publish(topic,message);
+                } catch (UnsupportedEncodingException | MqttException e) {
+                    Timber.i(e.getMessage());
+                    e.printStackTrace();
+                }
+                break;
+            }
             default:{
                 Toast.makeText(this,event.getMessage(),Toast.LENGTH_LONG).show();
             }
@@ -348,10 +423,20 @@ public class MainActivity extends AppCompatActivity implements RoomControlFragme
     }
 
     public static class MessageEvent{
-         private String message;
+        private String message;
+
+        private String controlName;
+
+        private float status;
 
         public MessageEvent(String message){
             this.message=message;
+        }
+
+        public MessageEvent(String message,String controlName, float status){
+            this.message=message;
+            this.controlName=controlName;
+            this.status=status;
         }
 
         public String getMessage() {
@@ -361,7 +446,24 @@ public class MainActivity extends AppCompatActivity implements RoomControlFragme
         public void setMessage(String message) {
             this.message = message;
         }
+
+        public String getControlName() {
+            return controlName;
+        }
+
+        public void setControlName(String controlName) {
+            this.controlName = controlName;
+        }
+
+        public float getStatus() {
+            return status;
+        }
+
+        public void setStatus(float status) {
+            this.status = status;
+        }
     }
+
     @Override
     public void onStart() {
         super.onStart();

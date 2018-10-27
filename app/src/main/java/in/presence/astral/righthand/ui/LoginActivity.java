@@ -48,7 +48,11 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        getSupportActionBar().hide();
+
+
+        if(getSupportActionBar()!=null){
+            getSupportActionBar().hide();
+        }
 
         textDummyHintUsername = findViewById(R.id.text_dummy_hint_username);
         textDummyHintPassword = findViewById(R.id.text_dummy_hint_password);
@@ -131,8 +135,24 @@ public class LoginActivity extends AppCompatActivity {
     }
 
 
+    public static class MessageEvent{
+        private String message;
+
+        public MessageEvent(String message){
+            this.message=message;
+        }
+
+        public String getMessage() {
+            return message;
+        }
+
+        public void setMessage(String message) {
+            this.message = message;
+        }
+    }
+
     @Subscribe(threadMode= ThreadMode.MAIN)
-    public void onMessageEvent(MainActivity.MessageEvent event){
+    public void onMessageEvent(MessageEvent event){
 
         Timber.i(event.getMessage());
 
@@ -182,22 +202,6 @@ public class LoginActivity extends AppCompatActivity {
         return valid;
     }
 
-
-    public static class LoginEvent{
-        private String message;
-
-        public LoginEvent(String message){
-            this.message=message;
-        }
-
-        public String getMessage() {
-            return message;
-        }
-
-        public void setMessage(String message) {
-            this.message = message;
-        }
-    }
     @Override
     public void onStart() {
         super.onStart();

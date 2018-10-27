@@ -7,6 +7,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -94,6 +95,10 @@ public class DBSyncTask {
                 EventBus.getDefault().post(new MainActivity.MessageEvent("ServerUnreachable"));
 
             }
+
+        }catch (SocketTimeoutException e){
+            e.printStackTrace();
+            EventBus.getDefault().post(new MainActivity.MessageEvent("Check your internet connections"));
 
         } catch (IOException | JSONException e1) {
             e1.printStackTrace();

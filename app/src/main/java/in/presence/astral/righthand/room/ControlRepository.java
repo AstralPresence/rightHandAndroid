@@ -51,6 +51,11 @@ public class ControlRepository {
         selectedGroupRoom.postValue( groupRoom );
     }
 
+    public void updateControlStatus(String group, String room, String name,float status){
+        mControlDao.update(status,group,room,name);
+
+    }
+
 
     private static class InsertAsyncTask extends AsyncTask<Control, Void, Void> {
 

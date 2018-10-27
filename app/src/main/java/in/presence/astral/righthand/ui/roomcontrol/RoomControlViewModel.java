@@ -16,10 +16,12 @@ public class RoomControlViewModel extends AndroidViewModel {
 
     private ControlRepository mRepository;
 
+    private MutableLiveData<String> mSelectedRoom;
 
     public RoomControlViewModel (Application application) {
         super(application);
         mRepository = new ControlRepository(application);
+        mSelectedRoom = mRepository.getSelectedGroupRoom();
     }
 
 
@@ -31,9 +33,6 @@ public class RoomControlViewModel extends AndroidViewModel {
         return mRepository.getRoomControls(group,room);
     }
 
-    MutableLiveData<String> getSelectedGroupRoom(){
-        return mRepository.getSelectedGroupRoom();
-    }
 
     public void insert(Control control) { mRepository.insertControls(control); }
 }

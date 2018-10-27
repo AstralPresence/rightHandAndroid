@@ -4,16 +4,21 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.SeekBar;
-import android.widget.Switch;
 import android.widget.TextView;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.util.List;
 
+import androidx.appcompat.widget.SwitchCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import in.presence.astral.righthand.R;
 import in.presence.astral.righthand.room.Control;
+import in.presence.astral.righthand.ui.main.MainActivity;
+import timber.log.Timber;
 
 public class ControlsAdapter extends RecyclerView.Adapter<ControlsAdapter.ControlViewHolder> {
 
@@ -21,7 +26,7 @@ public class ControlsAdapter extends RecyclerView.Adapter<ControlsAdapter.Contro
         private final TextView controlName;
         private final ImageView controlImage;
         private final SeekBar controlSeek;
-        private final Switch controlSwitch;
+        private final SwitchCompat controlSwitch;
 
         private ControlViewHolder(View itemView) {
             super(itemView);
@@ -48,6 +53,50 @@ public class ControlsAdapter extends RecyclerView.Adapter<ControlsAdapter.Contro
         if (mControls != null) {
             Control current = mControls.get(position);
             holder.controlName.setText(current.getName());
+            if(current.getName().toLowerCase().contains("fan")){
+                holder.controlImage.setImageResource(R.drawable.ic_fan_black_24dp);
+                holder.controlSwitch.setVisibility(View.GONE);
+                holder.controlSeek.setVisibility(View.VISIBLE);
+                holder.controlSeek.setTag(current.getName());
+                holder.controlSeek.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                    @Override
+                    public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                        String controlName = (String)seekBar.getTag();
+                        Timber.i("control name %s",controlName);
+                        EventBus.getDefault().post(new MainActivity.MessageEvent("mqtt",controlName,i));
+                    }
+
+                    @Override
+                    public void onStartTrackingTouch(SeekBar seekBar) {
+
+                    }
+
+                    @Override
+                    public void onStopTrackingTouch(SeekBar seekBar) {
+
+                    }
+                });
+            } else {
+                holder.controlSwitch.setTag(current.getName());
+                if(current.getName().toLowerCase().contains("light")){
+                    holder.controlImage.setImageResource(R.drawable.ic_lightbulb_black_24dp);
+                } else {
+                    holder.controlImage.setImageResource(R.drawable.ic_power_black_24dp);
+                }
+                holder.controlSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                        String controlName = (String)compoundButton.getTag();
+                        Timber.i("control name %s",controlName);
+                        if(b){
+                            EventBus.getDefault().post(new MainActivity.MessageEvent("mqtt",controlName,1));
+                        } else {
+
+                            EventBus.getDefault().post(new MainActivity.MessageEvent("mqtt",controlName,0));
+                        }
+                    }
+                });
+            }
         }
     }
 

@@ -83,11 +83,11 @@ public class AuthService extends IntentService {
                 message="LoginFailed";
             }
 
-            EventBus.getDefault().post(new LoginActivity.LoginEvent(message));
+            EventBus.getDefault().post(new LoginActivity.MessageEvent(message));
 
         } else {
 
-            EventBus.getDefault().post(new LoginActivity.LoginEvent("ServerUnreachable"));
+            EventBus.getDefault().post(new LoginActivity.MessageEvent("ServerUnreachable"));
         }
 
     }
