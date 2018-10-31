@@ -35,10 +35,8 @@ public class RoomControlFragment extends Fragment {
     ControlsAdapter adapter;
     View rootView;
     RecyclerView controlsRecyclerView;
-    static String group, room;
+    String[] gr;
 
-
-    private OnFragmentInteractionListener mListener;
 
     public static RoomControlFragment newInstance() {
         return new RoomControlFragment();
@@ -58,29 +56,6 @@ public class RoomControlFragment extends Fragment {
 
     }
 
-
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
-        }
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        mListener = null;
-    }
-
-    public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onUserControlEvent(String topic, int value);
-    }
     @Override
     public void onStart() {
         super.onStart();
@@ -115,13 +90,17 @@ public class RoomControlFragment extends Fragment {
 
         Timber.i(event.getMessage());
 
-        String[] gr = event.getMessage().split("/");
+        if(!event.getMessage().contains("reload")){
+            gr = event.getMessage().split("/");
 
+            mViewModel = ViewModelProviders.of(this).get(RoomControlViewModel.class);
 
-        mViewModel = ViewModelProviders.of(this).get(RoomControlViewModel.class);
+        }
         mViewModel.getRoomControls(gr[0],gr[1]).observe(RoomControlFragment.this, new Observer<List<Control>>() {
             @Override
             public void onChanged(List<Control> controls) {
+
+                Timber.i("on changed called");
                 adapter.setControls(controls);
             }
         });

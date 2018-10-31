@@ -15,13 +15,11 @@ public class MainViewModel extends AndroidViewModel {
     private ControlRepository mRepository;
 
     private LiveData<List<Control>> mAllControls;
-    private MutableLiveData<String> mSelectedRoom;
 
     public MainViewModel (Application application) {
         super(application);
         mRepository = new ControlRepository(application);
         mAllControls = mRepository.getAllControls();
-        mSelectedRoom = mRepository.getSelectedGroupRoom();
     }
 
     LiveData<List<Control>> getAllControls() { return mAllControls; }
@@ -34,9 +32,6 @@ public class MainViewModel extends AndroidViewModel {
         mRepository.updateControlStatus(group,room,name,status);
     }
 
-    public MutableLiveData<String> getSelectedGroupRoom(){
-        return mSelectedRoom;
-    }
 
 
 }

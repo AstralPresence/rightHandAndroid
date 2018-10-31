@@ -13,7 +13,6 @@ public class ControlRepository {
 
     private ControlDao mControlDao;
 
-    public final MutableLiveData<String> selectedGroupRoom = new MutableLiveData<String>();
 
     public ControlRepository(Application application) {
         AppDatabase db = AppDatabase.getDatabase(application);
@@ -41,18 +40,10 @@ public class ControlRepository {
         new InsertAsyncTask(mControlDao).execute(controls);
     }
 
-    public MutableLiveData< String > getSelectedGroupRoom( )
-    {
-        return selectedGroupRoom;
-    }
-
-    public void setSelectedGroupRoom( String groupRoom )
-    {
-        selectedGroupRoom.postValue( groupRoom );
-    }
 
     public void updateControlStatus(String group, String room, String name,float status){
-        mControlDao.update(status,group,room,name);
+        Control control = new Control(group,room,name,null,null,status);
+        new UpdateAsyncTask(mControlDao).execute(control);
 
     }
 
@@ -68,6 +59,23 @@ public class ControlRepository {
         @Override
         protected Void doInBackground(final Control... params) {
             mAsyncTaskDao.insert(params[0]);
+            return null;
+        }
+    }
+
+
+    private static class UpdateAsyncTask extends AsyncTask<Control, Void, Void> {
+
+        private ControlDao mAsyncTaskDao;
+
+        UpdateAsyncTask(ControlDao dao) {
+            mAsyncTaskDao = dao;
+        }
+
+        @Override
+        protected Void doInBackground(final Control... params) {
+            Control control = params[0];
+            mAsyncTaskDao.update(control.getStatus(),control.getGroup(),control.getRoom(),control.getName());
             return null;
         }
     }

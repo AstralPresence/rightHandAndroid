@@ -21,7 +21,6 @@ public class RoomControlViewModel extends AndroidViewModel {
     public RoomControlViewModel (Application application) {
         super(application);
         mRepository = new ControlRepository(application);
-        mSelectedRoom = mRepository.getSelectedGroupRoom();
     }
 
 

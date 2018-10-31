@@ -58,6 +58,7 @@ public class ControlsAdapter extends RecyclerView.Adapter<ControlsAdapter.Contro
                 holder.controlSwitch.setVisibility(View.GONE);
                 holder.controlSeek.setVisibility(View.VISIBLE);
                 holder.controlSeek.setTag(current.getName());
+                holder.controlSeek.setProgress((int) current.getStatus());
                 holder.controlSeek.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                     @Override
                     public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
@@ -78,6 +79,11 @@ public class ControlsAdapter extends RecyclerView.Adapter<ControlsAdapter.Contro
                 });
             } else {
                 holder.controlSwitch.setTag(current.getName());
+                if(current.getStatus()==1){
+                    holder.controlSwitch.setChecked(true);
+                } else {
+                    holder.controlSwitch.setChecked(false);
+                }
                 if(current.getName().toLowerCase().contains("light")){
                     holder.controlImage.setImageResource(R.drawable.ic_lightbulb_black_24dp);
                 } else {
