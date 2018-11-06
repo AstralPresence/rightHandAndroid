@@ -9,19 +9,19 @@ import java.util.List;
  * Created by Maha Perriyava on 4/5/2018.
  */
 
-public class AccessGroupsResponse implements Serializable {
+public class EventsResponse implements Serializable {
 
     @SerializedName("result")
     private String result;
 
     @SerializedName("message")
-    private List<AccessGroup> message;
+    private List<Event> message;
 
-    public List<AccessGroup> getMessage() {
+    public List<Event> getMessage() {
         return message;
     }
 
-    public void setMessage(List<AccessGroup> message) {
+    public void setMessage(List<Event> message) {
         this.message = message;
     }
 

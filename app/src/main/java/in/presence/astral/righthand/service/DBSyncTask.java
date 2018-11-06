@@ -12,12 +12,18 @@ import java.net.URL;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import in.presence.astral.righthand.model.AccessGroupsResponse;
 import in.presence.astral.righthand.model.Control;
 import in.presence.astral.righthand.model.ControlsResponse;
+import in.presence.astral.righthand.model.EventsResponse;
+import in.presence.astral.righthand.model.ModeParticular;
+import in.presence.astral.righthand.model.ModesResponse;
 import in.presence.astral.righthand.model.UserObject;
+import in.presence.astral.righthand.model.UsersResponse;
 import in.presence.astral.righthand.rest.ApiClient;
 import in.presence.astral.righthand.rest.ApiInterface;
 import in.presence.astral.righthand.room.AppDatabase;
+import in.presence.astral.righthand.room.Mode;
 import in.presence.astral.righthand.ui.main.MainActivity;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -45,6 +51,10 @@ public class DBSyncTask {
 
         fetchAccessToken();
         handleActionGetControls();
+        handleActionGetModes();
+        handleActionGetAccessGroups();
+        handleActionGetUsers();
+        handleActionGetEvents();
 
 
     }
@@ -143,5 +153,151 @@ public class DBSyncTask {
         }
 
     }
+    private  static void  handleActionGetModes() {
 
+        user = new UserObject(mContext);
+        ApiInterface apiService = ApiClient.getClient().create(ApiInterface.class);
+        Call<ModesResponse> callTT = apiService.getModes(user.getAccessToken());
+
+        try {
+            Response<ModesResponse> response = callTT.execute();
+            if(response.isSuccessful()){
+                if(response.code()==200){
+                    List<in.presence.astral.righthand.model.Mode> modeList = response.body().getMessage();
+                    insertModesList(modeList);
+                } else if (response.code() == 401) { //bad auth
+                    user.setAccessToken(null, mContext); //reset access token
+                    fetchAccessToken();
+                }
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void insertModesList(List<in.presence.astral.righthand.model.Mode> modesList) {
+
+
+        for(in.presence.astral.righthand.model.Mode mode: modesList){
+
+            for(ModeParticular modeParticular:mode.getControlData()){
+                AppDatabase.getDatabase(mContext).modesDao().insert(new in.presence.astral.righthand.room.Mode(
+                        modeParticular.getControlTopic(),mode.getName(),modeParticular.getControlStatus()
+                ));
+            }
+
+
+
+        }
+
+    }
+
+
+    private  static void  handleActionGetAccessGroups() {
+
+        user = new UserObject(mContext);
+        ApiInterface apiService = ApiClient.getClient().create(ApiInterface.class);
+        Call<AccessGroupsResponse> callTT = apiService.getAccessGroups(user.getAccessToken());
+
+        try {
+            Response<AccessGroupsResponse> response = callTT.execute();
+            if(response.isSuccessful()){
+                if(response.code()==200){
+                    List<in.presence.astral.righthand.model.AccessGroup> agList = response.body().getMessage();
+                    insertAGList(agList);
+                } else if (response.code() == 401) { //bad auth
+                    user.setAccessToken(null, mContext); //reset access token
+                    fetchAccessToken();
+                }
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void insertAGList(List<in.presence.astral.righthand.model.AccessGroup> agList) {
+
+
+        for(in.presence.astral.righthand.model.AccessGroup ag: agList){
+
+            AppDatabase.getDatabase(mContext).accessGroupsDao().insert(new in.presence.astral.righthand.room.AccessGroup(
+                    ag.getName(),ag.getAccessAllowed().toString()
+            ));
+
+        }
+
+    }
+    private  static void  handleActionGetUsers() {
+
+        user = new UserObject(mContext);
+        ApiInterface apiService = ApiClient.getClient().create(ApiInterface.class);
+        Call<UsersResponse> callTT = apiService.getUsers(user.getAccessToken());
+
+        try {
+            Response<UsersResponse> response = callTT.execute();
+            if(response.isSuccessful()){
+                if(response.code()==200){
+                    List<in.presence.astral.righthand.model.User> userList = response.body().getMessage();
+                    insertUsersList(userList);
+                } else if (response.code() == 401) { //bad auth
+                    user.setAccessToken(null, mContext); //reset access token
+                    fetchAccessToken();
+                }
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void insertUsersList(List<in.presence.astral.righthand.model.User> userList) {
+
+
+        for(in.presence.astral.righthand.model.User user: userList){
+
+            AppDatabase.getDatabase(mContext).usersDao().insert(new in.presence.astral.righthand.room.User(
+                    user.getUsername(),user.getEmail(),user.getAccessGroupType(),user.getAccessGroupName(),user.getValidity()
+            ));
+
+        }
+
+    }private  static void  handleActionGetEvents() {
+
+        user = new UserObject(mContext);
+        ApiInterface apiService = ApiClient.getClient().create(ApiInterface.class);
+        Long tsLong = System.currentTimeMillis()/1000;
+        String ts = tsLong.toString();
+        Call<EventsResponse> callTT = apiService.getEvents(user.getAccessToken(),ts);
+
+        try {
+            Response<EventsResponse> response = callTT.execute();
+            if(response.isSuccessful()){
+                if(response.code()==200){
+                    List<in.presence.astral.righthand.model.Event> eventList = response.body().getMessage();
+                    insertEvents(eventList);
+                } else if (response.code() == 401) { //bad auth
+                    user.setAccessToken(null, mContext); //reset access token
+                    fetchAccessToken();
+                }
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void insertEvents(List<in.presence.astral.righthand.model.Event> eventList) {
+
+
+        for(in.presence.astral.righthand.model.Event event: eventList){
+
+            AppDatabase.getDatabase(mContext).eventsDao().insert(new in.presence.astral.righthand.room.Event(
+                    event.getTopic(),event.getTimeStamp(),event.getLog()
+            ));
+
+        }
+
+    }
 }

@@ -14,16 +14,24 @@ public class User implements Serializable {
     @SerializedName("email")
     private String email;
 
+    @SerializedName("username")
+    private String username;
+
     @SerializedName("accessGroupType")
     private String accessGroupType;
 
-    @SerializedName("userValidity")
-    private long userValidity;
+    @SerializedName("accessGroupName")
+    private String accessGroupName;
 
-    public User(String email, String accessGroupType, long userValidity){
+    @SerializedName("validity")
+    private String validity;
+
+    public User(String email, String accessGroupType,String username,String accessGroupName, String validity){
         this.accessGroupType=accessGroupType;
         this.email=email;
-        this.userValidity=userValidity;
+        this.accessGroupName=accessGroupName;
+        this.username=username;
+        this.validity=validity;
     }
 
     public String getEmail() {
@@ -42,11 +50,27 @@ public class User implements Serializable {
         this.accessGroupType = accessGroupType;
     }
 
-    public long getUserValidity() {
-        return userValidity;
+    public String getAccessGroupName() {
+        return accessGroupName;
     }
 
-    public void setUserValidity(long userValidity) {
-        this.userValidity = userValidity;
+    public void setAccessGroupName(String accessGroupName) {
+        this.accessGroupName = accessGroupName;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getValidity() {
+        return validity;
+    }
+
+    public void setValidity(String validity) {
+        this.validity = validity;
     }
 }

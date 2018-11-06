@@ -5,12 +5,20 @@ import android.content.Context;
 import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
+import in.presence.astral.righthand.dao.AccessGroupsDao;
 import in.presence.astral.righthand.dao.ControlDao;
+import in.presence.astral.righthand.dao.EventsDao;
+import in.presence.astral.righthand.dao.ModesDao;
+import in.presence.astral.righthand.dao.UsersDao;
 
-@Database(entities = {Control.class}, version = 2)
+@Database(entities = {Control.class, Mode.class, User.class,AccessGroup.class,Event.class}, version = 4)
 public abstract class AppDatabase extends RoomDatabase {
 
     public abstract ControlDao controlObjectDao();
+    public abstract ModesDao modesDao();
+    public abstract UsersDao usersDao();
+    public abstract AccessGroupsDao accessGroupsDao();
+    public abstract EventsDao eventsDao();
 
 
     private static volatile AppDatabase INSTANCE;
@@ -21,7 +29,7 @@ public abstract class AppDatabase extends RoomDatabase {
                 if (INSTANCE == null) {
                     // Create database here
                     INSTANCE = Room.databaseBuilder(context.getApplicationContext(),
-                            AppDatabase.class, "rh_db")
+                            AppDatabase.class, "rh_db").fallbackToDestructiveMigration()
                             .build();
 
                 }

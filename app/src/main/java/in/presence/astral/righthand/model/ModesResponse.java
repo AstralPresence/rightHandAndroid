@@ -2,20 +2,14 @@ package in.presence.astral.righthand.model;
 
 import com.google.gson.annotations.SerializedName;
 
-import java.io.Serializable;
 import java.util.List;
 
-/**
- * Created by Maha Perriyava on 4/5/2018.
- */
-
-public class UsersResponse implements Serializable {
-
+public class ModesResponse {
     @SerializedName("result")
     private String result;
 
     @SerializedName("message")
-    private List<User> message;
+    private List<Mode> message;
 
     public String getResult() {
         return result;
@@ -25,11 +19,11 @@ public class UsersResponse implements Serializable {
         this.result = result;
     }
 
-    public List<User> getMessage() {
+    public List<Mode> getMessage() {
         return message;
     }
 
-    public void setMessage(List<User> message) {
+    public void setMessage(List<Mode> message) {
         this.message = message;
     }
 }
