@@ -16,14 +16,27 @@ public class AccessGroup {
     @ColumnInfo(name = "name")
     private String name;
 
-    @ColumnInfo(name = "controls")
-    private String controlsAllowed;
+    @NonNull
+    @ColumnInfo(name = "uids")
+    private String uids;
+
+    @ColumnInfo(name = "controlTopic")
+    private String controlTopic;
+
+    @ColumnInfo(name = "startTime")
+    private int startTime;
+
+    @ColumnInfo(name = "endTime")
+    private int endTime;
 
 
 
-    public AccessGroup(String name,  String controlsAllowed) {
+    public AccessGroup(String name,  String uids,String controlTopic, int startTime, int endTime) {
         this.name = name;
-        this.controlsAllowed = controlsAllowed;
+        this.uids = uids;
+        this.controlTopic=controlTopic;
+        this.startTime =startTime;
+        this.endTime =endTime;
     }
     @NonNull
     public String getName() {
@@ -34,11 +47,36 @@ public class AccessGroup {
         this.name = name;
     }
 
-    public String getControlsAllowed() {
-        return controlsAllowed;
+    @NonNull
+    public String getUids() {
+        return uids;
     }
 
-    public void setControlsAllowed(String controlsAllowed) {
-        this.controlsAllowed = controlsAllowed;
+    public void setUids(@NonNull String uids) {
+        this.uids = uids;
+    }
+
+    public String getControlTopic() {
+        return controlTopic;
+    }
+
+    public void setControlTopic(String controlTopic) {
+        this.controlTopic = controlTopic;
+    }
+
+    public int getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(int startTime) {
+        this.startTime = startTime;
+    }
+
+    public int getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(int endTime) {
+        this.endTime = endTime;
     }
 }

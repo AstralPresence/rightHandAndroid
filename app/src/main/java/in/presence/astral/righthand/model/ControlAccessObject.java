@@ -10,7 +10,7 @@ public class ControlAccessObject implements Serializable {
     @SerializedName("controlTopic")
     private String controlTopic;
 
-    @SerializedName("timeRestrictions")
+    @SerializedName("timeRestriction")
     private List<TimeRestriction> timeRestrictions;
 
     public ControlAccessObject(String controlTopic, List<TimeRestriction> timeRestrictions ){

@@ -23,7 +23,7 @@ public class User {
     @ColumnInfo(name = "accessGroupName")
     private String accessGroupName;
 
-    @NonNull
+
     @ColumnInfo(name = "validity")
     private String validity;
 

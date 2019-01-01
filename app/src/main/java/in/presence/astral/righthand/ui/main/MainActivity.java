@@ -11,12 +11,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
-import com.firebase.jobdispatcher.FirebaseJobDispatcher;
-import com.firebase.jobdispatcher.GooglePlayDriver;
-import com.firebase.jobdispatcher.Job;
 import com.mikepenz.materialdrawer.Drawer;
 import com.mikepenz.materialdrawer.DrawerBuilder;
-import com.mikepenz.materialdrawer.model.DividerDrawerItem;
 import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
 import com.mikepenz.materialdrawer.model.SecondaryDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
@@ -25,14 +21,12 @@ import org.eclipse.paho.android.service.MqttAndroidClient;
 import org.eclipse.paho.client.mqttv3.DisconnectedBufferOptions;
 import org.eclipse.paho.client.mqttv3.IMqttActionListener;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
-import org.eclipse.paho.client.mqttv3.IMqttMessageListener;
 import org.eclipse.paho.client.mqttv3.IMqttToken;
 import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
-import org.eclipse.paho.client.mqttv3.MqttPersistenceException;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
@@ -53,8 +47,8 @@ import in.presence.astral.righthand.model.UserObject;
 import in.presence.astral.righthand.room.Control;
 import in.presence.astral.righthand.service.DbSyncService;
 import in.presence.astral.righthand.ui.LoginActivity;
+import in.presence.astral.righthand.ui.users.UsersActivity;
 import in.presence.astral.righthand.ui.roomcontrol.RoomControlFragment;
-import in.presence.astral.righthand.ui.roomcontrol.RoomControlViewModel;
 import timber.log.Timber;
 
 
@@ -79,6 +73,12 @@ public class MainActivity extends AppCompatActivity {
     Drawer drawer;
 
     String selectedGroup,selectedRoom;
+
+    @Override
+    protected void onResume() {
+        syncDB();
+        super.onResume();
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -108,7 +108,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         try {
-            connectMqtt("tcp://192.168.1.15:1883");
+            connectMqtt("tcp://192.168.43.58:1883");
         } catch (MqttException e) {
             e.printStackTrace();
         }
@@ -144,6 +144,7 @@ public class MainActivity extends AppCompatActivity {
 
         drawer.addItem(item1);
 
+
         mainViewModel = ViewModelProviders.of(this).get(MainViewModel.class);
         mainViewModel.getDistinctGroups().observe(this, new Observer<List<String>>() {
             @Override
@@ -155,6 +156,8 @@ public class MainActivity extends AppCompatActivity {
 
                 for(String group: groups){
 
+                    Timber.i("parsing menu group %s",group);
+
                     grpCount++;
                     PrimaryDrawerItem item1 = new PrimaryDrawerItem().withIdentifier(grpCount).withSelectable(false).withName(group);
 
@@ -163,6 +166,9 @@ public class MainActivity extends AppCompatActivity {
                         public void onChanged(List<String> rooms) {
 
                             for(String room : rooms){
+
+                                Timber.i("parsing menu room %s",room);
+
                                 if(room.toLowerCase().contains("kitchen")){
                                     item = new SecondaryDrawerItem().withName(room).withIcon(R.drawable.ic_kitchen_24dp);
                                 } else if(room.toLowerCase().contains("living")){
@@ -184,20 +190,16 @@ public class MainActivity extends AppCompatActivity {
 
     public void syncDB(){
 
-        FirebaseJobDispatcher dispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(this));
-        Job myJob = dispatcher.newJobBuilder()
-                .setService(DbSyncService.class) // the JobService that will be called
-                .setTag("my-unique-tag")        // uniquely identifies the job
-                .build();
 
-        dispatcher.mustSchedule(myJob);
+        Intent intent = new Intent(this,DbSyncService.class);
+        startService(intent);
     }
 
 
     public void connectMqtt(String serverUri) throws MqttException {
 
         if(null==serverUri||serverUri.isEmpty()){
-            serverUri="tcp://192.168.1.15:1883";
+            serverUri="tcp://192.168.43.58:1883";
 
         }
         Timber.i("mqtt attempt started");
@@ -274,6 +276,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
+
 
     public void subscribeToTopics(){
 
@@ -419,6 +422,8 @@ public class MainActivity extends AppCompatActivity {
         } else if (id == R.id.action_signout) {
             signOut();
             return true;
+        } else if (id == R.id.action_users) {
+            startActivity(new Intent(this,UsersActivity.class));
         }
 
         return super.onOptionsItemSelected(item);

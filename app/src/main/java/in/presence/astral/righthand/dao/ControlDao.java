@@ -36,7 +36,13 @@ public interface ControlDao {
     void update(float status, String group, String room, String name);
 
 
-    @Query("SELECT * from controls where ctrl_group = :group AND room = :room")
+    @Query("SELECT * from controls where ctrl_group = :group AND room = :room AND type NOT IN ('CAMERA','LOCK')")
     LiveData<List<Control>> getRoomControls(String group, String room);
+
+    @Query("SELECT * from controls where ctrl_group = :group AND room = :room AND type = 'CAMERA'")
+    LiveData<List<Control>> getRoomCameras(String group, String room);
+
+    @Query("SELECT * from controls where ctrl_group = :group AND room = :room AND type = 'LOCK'")
+    LiveData<List<Control>> getRoomLocks(String group, String room);
 
 }

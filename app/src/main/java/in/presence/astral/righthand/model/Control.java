@@ -6,20 +6,19 @@ import java.io.Serializable;
 
 public class Control implements Serializable {
 
-
     @SerializedName("type")
     private String type;
 
-    @SerializedName("name")
+    @SerializedName("controlName")
     private String name;
 
-    @SerializedName("status")
+    @SerializedName("controlStatus")
     private float status;
 
     @SerializedName("displayName")
     private String displayName;
 
-    @SerializedName("group")
+    @SerializedName("groupName")
     private String group;
 
     @SerializedName("room")

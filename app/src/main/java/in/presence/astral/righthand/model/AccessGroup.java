@@ -17,7 +17,7 @@ public class AccessGroup implements Serializable {
     @SerializedName("type")
     private String type;
 
-    @SerializedName("uids")
+    @SerializedName("UIDs")
     private List<String> uids;
 
     @SerializedName("accessAllowed")

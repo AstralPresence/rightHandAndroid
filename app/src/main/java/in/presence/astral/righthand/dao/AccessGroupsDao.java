@@ -22,4 +22,9 @@ public interface AccessGroupsDao {
     @Query("SELECT * from access_group")
     LiveData<List<AccessGroup>> getAllAccessGroups();
 
+
+
+    @Query("SELECT DISTINCT name from access_group")
+    LiveData<List<String>> getAllAGNames();
+
 }

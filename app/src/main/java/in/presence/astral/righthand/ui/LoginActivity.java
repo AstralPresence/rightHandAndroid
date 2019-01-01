@@ -182,6 +182,7 @@ public class LoginActivity extends AppCompatActivity {
     public boolean validate() {
         boolean valid = true;
 
+
         String email = editUsername.getText().toString();
         String password = editPassword.getText().toString();
 

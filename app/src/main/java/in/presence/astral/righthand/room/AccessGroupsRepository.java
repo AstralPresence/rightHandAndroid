@@ -25,6 +25,13 @@ public class AccessGroupsRepository {
 
 
 
+    public LiveData<List<String>> getAllAccessGroupsNames() {
+        return mAccessGroupsDao.getAllAGNames();
+    }
+
+
+
+
     public void insertAccessGroup(AccessGroup accessGroup) {
         new InsertAsyncTask(mAccessGroupsDao).execute(accessGroup);
     }

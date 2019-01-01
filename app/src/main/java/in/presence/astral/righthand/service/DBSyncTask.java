@@ -14,10 +14,12 @@ import java.util.concurrent.TimeUnit;
 
 import in.presence.astral.righthand.model.AccessGroupsResponse;
 import in.presence.astral.righthand.model.Control;
+import in.presence.astral.righthand.model.ControlAccessObject;
 import in.presence.astral.righthand.model.ControlsResponse;
 import in.presence.astral.righthand.model.EventsResponse;
 import in.presence.astral.righthand.model.ModeParticular;
 import in.presence.astral.righthand.model.ModesResponse;
+import in.presence.astral.righthand.model.TimeRestriction;
 import in.presence.astral.righthand.model.UserObject;
 import in.presence.astral.righthand.model.UsersResponse;
 import in.presence.astral.righthand.rest.ApiClient;
@@ -127,6 +129,7 @@ public class DBSyncTask {
             Response<ControlsResponse> response = callTT.execute();
             if(response.isSuccessful()){
                 if(response.code()==200){
+                    assert response.body() != null;
                     List<Control> ctrlList = response.body().getMessage();
                     insertControlsList(ctrlList);
                 } else if (response.code() == 401) { //bad auth
@@ -204,6 +207,7 @@ public class DBSyncTask {
             Response<AccessGroupsResponse> response = callTT.execute();
             if(response.isSuccessful()){
                 if(response.code()==200){
+                    Timber.i("accessGroup response body %s",response.body().toString());
                     List<in.presence.astral.righthand.model.AccessGroup> agList = response.body().getMessage();
                     insertAGList(agList);
                 } else if (response.code() == 401) { //bad auth
@@ -222,9 +226,30 @@ public class DBSyncTask {
 
         for(in.presence.astral.righthand.model.AccessGroup ag: agList){
 
-            AppDatabase.getDatabase(mContext).accessGroupsDao().insert(new in.presence.astral.righthand.room.AccessGroup(
-                    ag.getName(),ag.getAccessAllowed().toString()
-            ));
+
+            StringBuilder uids= new StringBuilder();
+            for(String uid : ag.getUids()){
+                uids.append(uid).append(";");
+            }
+            Timber.i("ag uids %s",uids.toString());
+
+            if(ag.getAccessAllowed()!=null){
+                for (ControlAccessObject controlAccessObject : ag.getAccessAllowed()){
+
+                    for(TimeRestriction timeRestriction : controlAccessObject.getTimeRestrictions()){
+
+                        AppDatabase.getDatabase(mContext).accessGroupsDao().insert(new in.presence.astral.righthand.room.AccessGroup(
+                                ag.getName(),
+                                uids.toString(),
+                                controlAccessObject.getControlTopic(),
+                                timeRestriction.getStart(),
+                                timeRestriction.getEnd()
+                        ));
+                    }
+
+                }
+            }
+
 
         }
 

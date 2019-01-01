@@ -69,7 +69,8 @@ dependencies {
     implementation 'org.eclipse.paho:org.eclipse.paho.android.service:1.1.1'
 
     implementation "com.mikepenz:materialdrawer:6.1.1"
-
+    implementation 'com.github.pedroSG94.rtmp-rtsp-stream-client-java:rtplibrary:1.4.6'
+    implementation 'com.google.android.exoplayer:exoplayer:2.9.1'
     implementation 'com.google.code.gson:gson:2.7'
     implementation 'com.squareup.retrofit2:converter-gson:2.0.2'
     implementation 'com.squareup.retrofit2:retrofit:2.3.0'
@@ -78,7 +79,6 @@ dependencies {
     implementation 'org.greenrobot:eventbus:3.0.0'
     implementation 'com.facebook.stetho:stetho:1.5.0'
     implementation 'com.google.dagger:dagger:2.0'
-    implementation 'com.firebase:firebase-jobdispatcher:0.7.0'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
 }

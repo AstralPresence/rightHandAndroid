@@ -28,6 +28,14 @@ public class ControlRepository {
         return mControlDao.getRoomControls(group,room);
     }
 
+    public LiveData<List<Control>> getRoomLocks(String group, String room) {
+        return mControlDao.getRoomLocks(group,room);
+    }
+
+    public LiveData<List<Control>> getRoomCameras(String group, String room) {
+        return mControlDao.getRoomCameras(group,room);
+    }
+
     public LiveData<List<String>> getDistinctGroups() {
         return mControlDao.getAllGroups();
     }

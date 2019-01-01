@@ -30,6 +30,7 @@ allprojects {
         maven {
             url 'https://maven.google.com/'
         }
+        maven { url 'https://jitpack.io' }
     }
 }
 
@@ -38,7 +39,7 @@ task clean(type: Delete) {
 }
 
 ext {
-    roomVersion = '1.1.1'
+    roomVersion = '1.1.1-rc1'
     archLifecycleVersion = '1.1.1'
     androidX = '1.0.0'
     constraintLayout = '1.0.2'
