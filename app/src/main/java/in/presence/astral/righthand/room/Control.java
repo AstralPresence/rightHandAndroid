@@ -30,13 +30,17 @@ public class Control {
     @ColumnInfo(name = "displayName")
     private String displayName;
 
-    public Control(String group, String room, String name, String type, String displayName,float status) {
+    @ColumnInfo(name = "ip")
+    private String ip;
+
+    public Control(String group, String room, String name, String type, String displayName,float status, String ip) {
         this.group = group;
         this.room = room;
         this.name = name;
         this.type = type;
         this.displayName= displayName;
         this.status=status;
+        this.ip=ip;
     }
 
     @NonNull
@@ -88,5 +92,13 @@ public class Control {
 
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
+    }
+
+    public String getIp() {
+        return ip;
+    }
+
+    public void setIp(String ip) {
+        this.ip = ip;
     }
 }

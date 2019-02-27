@@ -159,6 +159,7 @@ public class LoginActivity extends AppCompatActivity {
         switch (event.getMessage()){
             case "LoginSuccessful":{
 
+                Timber.i("starting main activity");
                 startActivity(new Intent(LoginActivity.this,MainActivity.class));
                 finish();
                 break;
@@ -173,6 +174,10 @@ public class LoginActivity extends AppCompatActivity {
                 Toast.makeText(LoginActivity.this, R.string.server_unreachable_msg,Toast.LENGTH_LONG).show();
                 break;
 
+            }default:{
+
+                Toast.makeText(LoginActivity.this,event.getMessage(),Toast.LENGTH_LONG).show();
+                break;
             }
 
         }

@@ -35,6 +35,7 @@ import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
+import java.util.Iterator;
 import java.util.List;
 
 import androidx.annotation.Nullable;
@@ -43,10 +44,12 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import in.presence.astral.righthand.R;
+import in.presence.astral.righthand.model.User;
 import in.presence.astral.righthand.model.UserObject;
 import in.presence.astral.righthand.room.Control;
 import in.presence.astral.righthand.service.DbSyncService;
 import in.presence.astral.righthand.ui.LoginActivity;
+import in.presence.astral.righthand.ui.door.DoorActivity;
 import in.presence.astral.righthand.ui.users.UsersActivity;
 import in.presence.astral.righthand.ui.roomcontrol.RoomControlFragment;
 import timber.log.Timber;
@@ -76,9 +79,18 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onResume() {
-        syncDB();
+
+        UserObject user = new UserObject(MainActivity.this);
+        String rt = user.getRefreshToken();
+        if(rt==null||rt.isEmpty()){
+            startActivity(new Intent(this,LoginActivity.class));
+        } else{
+            syncDB();
+        }
         super.onResume();
     }
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -90,6 +102,7 @@ public class MainActivity extends AppCompatActivity {
                     .commitNow();
         }
 
+        EventBus.getDefault().register(this);
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
@@ -104,11 +117,10 @@ public class MainActivity extends AppCompatActivity {
         syncDB();
 
 
-        PrimaryDrawerItem item1 = new PrimaryDrawerItem().withIdentifier(1).withName("--Rooms--");
 
 
         try {
-            connectMqtt("tcp://192.168.43.58:1883");
+            connectMqtt("tcp://192.168.1.109:1883");
         } catch (MqttException e) {
             e.printStackTrace();
         }
@@ -142,7 +154,6 @@ public class MainActivity extends AppCompatActivity {
                 })
                 .build();
 
-        drawer.addItem(item1);
 
 
         mainViewModel = ViewModelProviders.of(this).get(MainViewModel.class);
@@ -153,6 +164,9 @@ public class MainActivity extends AppCompatActivity {
 
                 grpCount=0;
                 drawer.removeAllItems();
+
+                PrimaryDrawerItem itemP = new PrimaryDrawerItem().withIdentifier(1).withSelectable(false).withName("--Rooms--");
+                drawer.addItem(itemP);
 
                 for(String group: groups){
 
@@ -175,10 +189,13 @@ public class MainActivity extends AppCompatActivity {
                                     item = new SecondaryDrawerItem().withName(room).withIcon(R.drawable.ic_living_room_24dp);
                                 } else if(room.toLowerCase().contains("bedroom")){
                                     item = new SecondaryDrawerItem().withName(room).withIcon(R.drawable.ic_bedroom_black_24dp);
+                                }  else if(room.toLowerCase().contains("office")){
+                                    item = new SecondaryDrawerItem().withName(room).withIcon(R.drawable.ic_work).withIsExpanded(true);
                                 } else {
                                     item = new SecondaryDrawerItem().withName(room).withIcon(R.drawable.ic_plant_black_24dp);
                                 }
                                 item1.withSubItems(item);
+
                             }
                         }
                     });
@@ -186,6 +203,16 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+
+        drawer.getExpandableExtension().expand(1);
+        drawer.getExpandableExtension().expand(2);
+        drawer.getExpandableExtension().expand(0);
+        drawer.getExpandableExtension().expand();
+        drawer.openDrawer();
+        drawer.getExpandableExtension().expand(1);
+        drawer.getExpandableExtension().expand(2);
+        drawer.getExpandableExtension().expand(0);
+        drawer.getExpandableExtension().expand();
     }
 
     public void syncDB(){
@@ -199,7 +226,7 @@ public class MainActivity extends AppCompatActivity {
     public void connectMqtt(String serverUri) throws MqttException {
 
         if(null==serverUri||serverUri.isEmpty()){
-            serverUri="tcp://192.168.43.58:1883";
+            serverUri="tcp://192.168.1.109:1883";
 
         }
         Timber.i("mqtt attempt started");
@@ -228,12 +255,26 @@ public class MainActivity extends AppCompatActivity {
                 try {
 
                     JSONObject jsonObject = new JSONObject(new String(message.getPayload()));
-                    int state = jsonObject.getInt("state");
-                    Timber.i("revec %d",state);
-                    MessageEvent messageEvent = new MessageEvent("dbUpdate",topic,state);
-                    EventBus.getDefault().post(messageEvent);
+                    Iterator<String> keys = jsonObject.keys();
 
-                    EventBus.getDefault().post(new RoomControlFragment.MessageEvent("reload"));
+
+                    while(keys.hasNext()){
+                        String key = keys.next();
+                        if(key.equals("state")){
+                            int state = jsonObject.getInt("state");
+
+                            Timber.i("revec %d",state);
+                            MessageEvent messageEvent = new MessageEvent("dbUpdate",topic,state);
+                            EventBus.getDefault().post(messageEvent);
+
+                            EventBus.getDefault().post(new RoomControlFragment.MessageEvent("reload"));
+                        } else if (key.equals("door")){
+
+                            EventBus.getDefault().post(new DoorActivity.MessageEvent(topic,jsonObject.getString("door")));
+                        }
+                    }
+
+
 
 
                 } catch (JSONException e) {
@@ -432,7 +473,7 @@ public class MainActivity extends AppCompatActivity {
     @Subscribe(threadMode= ThreadMode.MAIN)
     public void onMessageEvent(MessageEvent event){
 
-        Timber.i(event.getMessage());
+        Timber.i("main activity message received"+event.getMessage());
 
         switch (event.getMessage()){
             case "ServerUnreachable": {
@@ -452,18 +493,30 @@ public class MainActivity extends AppCompatActivity {
                 String topic = selectedGroup+"/"+selectedRoom+"/"+event.getControlName();
                 Timber.i("%s %s",topic,String.valueOf(event.getStatus()));
                 JSONObject jsonObject = new JSONObject();
-                try {
-                    jsonObject.put("state",event.getStatus());
-                } catch (JSONException e) {
-                    e.printStackTrace();
+                if(event.getDoorMessage()==null){
+
+                    try {
+                        jsonObject.put("state",event.getStatus());
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                } else if(event.getDoorMessage().equals("open")) {
+                    Timber.i("Sending door open");
+                    try {
+                        jsonObject.put("door",event.getDoorMessage());
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                 }
                 try {
+                    Timber.i("sending json on mqtt "+jsonObject.toString() +" to topic "+topic);
                     MqttMessage message = new MqttMessage(jsonObject.toString().getBytes("UTF-8"));
                     message.setQos(2);
                     mqttAndroidClient.publish(topic,message);
                 } catch (UnsupportedEncodingException | MqttException e) {
                     Timber.i(e.getMessage());
                     e.printStackTrace();
+                    Toast.makeText(MainActivity.this,"not connected",Toast.LENGTH_LONG).show();
                 }
                 break;
             }
@@ -485,6 +538,8 @@ public class MainActivity extends AppCompatActivity {
 
         private float status;
 
+        public String doorMsg;
+
         public MessageEvent(String message){
             this.message=message;
         }
@@ -495,12 +550,27 @@ public class MainActivity extends AppCompatActivity {
             this.status=status;
         }
 
+        public MessageEvent(String message,String controlName, String doorMsg){
+            this.message=message;
+            this.controlName=controlName;
+            this.doorMsg=doorMsg;
+        }
+
         public String getMessage() {
             return message;
         }
 
         public void setMessage(String message) {
             this.message = message;
+        }
+
+
+        public String getDoorMessage() {
+            return doorMsg;
+        }
+
+        public void setDoorMessage(String doorMessage) {
+            this.doorMsg = doorMessage;
         }
 
         public String getControlName() {
@@ -523,14 +593,17 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onStart() {
         super.onStart();
-        EventBus.getDefault().register(this);
+        Timber.i("on start called");
     }
 
     @Override
-    public void onStop() {
+    protected void onDestroy() {
         EventBus.getDefault().unregister(this);
-        super.onStop();
+        Timber.i("on stop called");
+        super.onDestroy();
     }
+
+
 
     private void signOut(){
 

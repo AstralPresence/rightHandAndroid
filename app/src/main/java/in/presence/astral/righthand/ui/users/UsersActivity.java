@@ -7,11 +7,9 @@ import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import in.presence.astral.righthand.R;
-import in.presence.astral.righthand.adapter.ControlsAdapter;
 import in.presence.astral.righthand.adapter.UsersAdapter;
-import in.presence.astral.righthand.room.Control;
 import in.presence.astral.righthand.room.User;
-import in.presence.astral.righthand.ui.roomcontrol.RoomControlFragment;
+import in.presence.astral.righthand.ui.roomcontrol.CreateNewAccessGroupActivity;
 import timber.log.Timber;
 
 import android.app.Activity;
@@ -25,7 +23,6 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.Spinner;
-import android.widget.SpinnerAdapter;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 

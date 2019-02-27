@@ -5,9 +5,9 @@ import android.content.Intent;
 
 
 import org.greenrobot.eventbus.EventBus;
+import org.json.JSONException;
 
 import java.io.IOException;
-import java.net.SocketTimeoutException;
 
 import in.presence.astral.righthand.model.Login;
 import in.presence.astral.righthand.model.UserObject;
@@ -42,9 +42,9 @@ public class AuthService extends IntentService {
             email = intent.getStringExtra("email");
             try {
                 handleActionLogin();
-            } catch (IOException e) {
+            } catch (Exception e) {
                 Timber.i("catching exception auth");
-                EventBus.getDefault().post(new MainActivity.MessageEvent("Check internet connection"));
+                EventBus.getDefault().post(new LoginActivity.MessageEvent("Check internet connection"));
                 e.printStackTrace();
             }
         } else {
@@ -56,7 +56,7 @@ public class AuthService extends IntentService {
         }
     }
 
-    private void handleActionLogin() throws IOException {
+    private void handleActionLogin() throws IOException, JSONException {
 
         UserObject user = new UserObject(this);
         Login loginBody = new Login(email,password);
@@ -78,7 +78,7 @@ public class AuthService extends IntentService {
                 } else {
 
                     message="LoginSuccessful";
-                    user.updateTokens(response.body(),null,this);
+                    user.updateTokens(response.body()   ,null,this);
                 }
 
 

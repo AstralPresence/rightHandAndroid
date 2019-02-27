@@ -11,7 +11,7 @@ import in.presence.astral.righthand.dao.EventsDao;
 import in.presence.astral.righthand.dao.ModesDao;
 import in.presence.astral.righthand.dao.UsersDao;
 
-@Database(entities = {Control.class, Mode.class, User.class,AccessGroup.class,Event.class}, version = 6)
+@Database(entities = {Control.class, Mode.class, User.class,AccessGroup.class,Event.class}, version = 7, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
 
     public abstract ControlDao controlObjectDao();

@@ -50,7 +50,7 @@ public class ControlRepository {
 
 
     public void updateControlStatus(String group, String room, String name,float status){
-        Control control = new Control(group,room,name,null,null,status);
+        Control control = new Control(group,room,name,null,null,status,null);
         new UpdateAsyncTask(mControlDao).execute(control);
 
     }

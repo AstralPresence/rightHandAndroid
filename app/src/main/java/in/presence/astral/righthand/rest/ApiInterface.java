@@ -27,6 +27,9 @@ import retrofit2.http.Path;
 
 public interface ApiInterface {
 
+    @GET("playSpeaker")
+    Call<JSONObject> playSpeaker();
+
     // User Management
 
     @GET("users/get")

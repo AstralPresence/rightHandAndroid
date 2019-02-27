@@ -2,7 +2,6 @@ package in.presence.astral.righthand.ui.roomcontrol;
 
 import android.app.Activity;
 import android.app.Dialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -14,9 +13,7 @@ import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.RadioGroup;
-import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -30,7 +27,6 @@ import java.util.List;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
@@ -39,12 +35,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import in.presence.astral.righthand.R;
 import in.presence.astral.righthand.adapter.ControlsAdapter;
 import in.presence.astral.righthand.room.Control;
-import in.presence.astral.righthand.ui.LoginActivity;
 import in.presence.astral.righthand.ui.door.DoorActivity;
-import in.presence.astral.righthand.ui.main.MainActivity;
-import in.presence.astral.righthand.ui.main.MainViewModel;
-import in.presence.astral.righthand.ui.users.CreateNewAccessGroupActivity;
-import in.presence.astral.righthand.ui.users.UsersActivity;
 import timber.log.Timber;
 
 public class RoomControlFragment extends Fragment {
@@ -81,7 +72,7 @@ public class RoomControlFragment extends Fragment {
         builderSingle.setTitle("Select A Mode");
 
 
-        final ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_selectable_list_item);
+        final ArrayAdapter<String> modeAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_selectable_list_item);
 
 
         mViewModel = ViewModelProviders.of(this).get(RoomControlViewModel.class);
@@ -90,14 +81,23 @@ public class RoomControlFragment extends Fragment {
             @Override
             public void onChanged(List<String> modes) {
 
-                hotFab.setVisibility(View.VISIBLE);
+                if(modes.size()>0){
 
-                Timber.i("on changed called");
-                for(String md : modes){
-                    arrayAdapter.add(md);
+                    hotFab.show();
+
+                    Timber.i("on changed called");
+
+                    modeAdapter.clear();
+
+                    for(String md : modes){
+                        modeAdapter.add(md);
+                    }
+
+                    modeAdapter.add(" + New Mode");
+
+                } else{
+                    hotFab.hide();
                 }
-
-                arrayAdapter.add(" + New Mode");
             }
         });
         builderSingle.setNegativeButton("cancel", new DialogInterface.OnClickListener() {
@@ -107,11 +107,11 @@ public class RoomControlFragment extends Fragment {
             }
         });
 
-        builderSingle.setAdapter(arrayAdapter, new DialogInterface.OnClickListener() {
+        builderSingle.setAdapter(modeAdapter, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
 
-                String modeName = arrayAdapter.getItem(which);
+                String modeName = modeAdapter.getItem(which);
 
                 if(modeName.equals(" + New Mode")){
 
@@ -192,7 +192,7 @@ public class RoomControlFragment extends Fragment {
             public void onChanged(List<Control> controls) {
 
                 if(controls.size()>0){
-                    camFab.setVisibility(View.VISIBLE);
+                    camFab.show();
                     camFab.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
@@ -202,6 +202,8 @@ public class RoomControlFragment extends Fragment {
                             startActivity(intent);
                         }
                     });
+                } else {
+                    camFab.hide();
                 }
             }
         });

@@ -18,16 +18,22 @@ public class Control implements Serializable {
     @SerializedName("displayName")
     private String displayName;
 
+
+    @SerializedName("ip")
+    private String ip;
+
+
     @SerializedName("groupName")
     private String group;
 
     @SerializedName("room")
     private String room;
 
-    public Control(String name, String displayName, String group, String room, float status, String type ){
+    public Control(String name, String displayName, String group, String room, float status, String type, String ip ){
         this.name=name;
         this.room=room;
         this.displayName=displayName;
+        this.ip=ip;
         this.group=group;
         this.status=status;
         this.type=type;
@@ -79,5 +85,13 @@ public class Control implements Serializable {
 
     public void setGroup(String group) {
         this.group = group;
+    }
+
+    public String getIp() {
+        return ip;
+    }
+
+    public void setIp(String ip) {
+        this.ip = ip;
     }
 }

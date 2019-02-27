@@ -149,7 +149,7 @@ public class DBSyncTask {
         for(Control ctrl: ctrlList){
 
             AppDatabase.getDatabase(mContext).controlObjectDao().insert(new in.presence.astral.righthand.room.Control(
-                    ctrl.getGroup(),ctrl.getRoom(),ctrl.getName(),ctrl.getType(),ctrl.getDisplayName(),ctrl.getStatus()
+                    ctrl.getGroup(),ctrl.getRoom(),ctrl.getName(),ctrl.getType(),ctrl.getDisplayName(),ctrl.getStatus(),ctrl.getIp()
             ));
 
 
